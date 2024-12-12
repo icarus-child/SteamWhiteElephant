@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: #66c0f4;
+    --color-secondary: #2a475e;
+    --color-background: #171a21;
+    --color-background-two: #1b2838;
+    --color-text: #c7d5e0;
+  }
+}
+
+@layer components {
+  .join-game.htmx-request {
+    display: flex;
+  }
+}
