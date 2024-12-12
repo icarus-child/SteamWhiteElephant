@@ -24,7 +24,8 @@ func GetGameTags(steamurl string) (tags []string) {
 		fmt.Println("An error occured:", e)
 	})
 	c.OnHTML(".glance_tags.popular_tags", func(e *colly.HTMLElement) {
-		for _, n := range e.DOM.Children().Nodes[:5] {
+		no_of_tags := min(len(e.DOM.Children().Nodes), 5)
+		for _, n := range e.DOM.Children().Nodes[:no_of_tags] {
 			if n != nil {
 				tags = append(tags, strings.TrimSpace(n.FirstChild.Data))
 			}
