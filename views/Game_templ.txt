@@ -1,0 +1,14 @@
+<div hx-ext=\"sse\" ws-connect=\"
+\" class=\"flex flex-row h-screen\">
+</div><script>\r\n    document.body.addEventListener('htmx:wsOpen', function(evt) {\r\n      console.log('connected');\r\n    });\r\n  </script>
+<div class=\"w-full min-h-full\" id=\"presents\">
+<div>
+<div class=\"flex\">
+<div class=\"bg-tertiary rounded-lg p-2\">
+</div>
+</div></div>
+</div>
+<div class=\"w-[40rem] min-h-full bg-background-two\" id=\"players\">
+<div>
+</div>
+</div>

@@ -8,69 +8,10 @@ templ Index(body templ.Component) {
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
 			<title>Steam Santa Swap</title>
 			<link href="../static/css/output.css" rel="stylesheet"/>
-			<script src="/static/htmx.min.js"></script>
+			<script src="https://unpkg.com/htmx.org@2.0.4"></script>
 		</head>
 		<body id="body" class="bg-background text-text">
 			@body
 		</body>
 	</html>
-}
-
-templ Game() {
-	<div class="flex flex-row h-screen">
-		<div class="w-full min-h-full">test</div>
-		<div class="w-[40rem] min-h-full bg-background-two">test2</div>
-	</div>
-}
-
-templ Form(errors ...string) {
-	<div class="grid w-full h-screen place-content-center">
-		<form class="w-full max-w-sm">
-			<div class="md:flex md:items-center mb-6">
-				<div class="md:w-1/3">
-					<label class="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-name">
-						Player Name
-					</label>
-				</div>
-				<div class="md:w-2/3">
-					<input class="bg-background appearance-none border-2 rounded w-full py-2 px-4 leading-tight focus:outline-none focus:text-primary focus:bg-white focus:border-primary" id="inline-name" name="name" type="text" required/>
-				</div>
-			</div>
-			<div class="md:flex md:items-center mb-1">
-				<div class="md:w-1/3">
-					<label class="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-game-id">
-						Steam Game ID
-					</label>
-				</div>
-				<div class="md:w-2/3">
-					<input class="bg-background appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-200 leading-tight focus:text-primary focus:outline-none focus:bg-white focus:border-primary" id="inline-game-id" name="game-id" type="text" placeholder="730" required/>
-				</div>
-			</div>
-			<div class="md:flex md:items-center mb-6">
-				<div class="md:w-1/3"></div>
-				<span class="md:w-2/3 text-gray-500 flex flex-col">
-					<span>https://store.steampowered.com/app/<b class="text-primary">730</b>/CounterStrike_2/</span>
-				</span>
-			</div>
-			<div class="md:flex md:items-center">
-				<div class="md:w-1/3"></div>
-				<div class="md:w-2/3">
-					<button hx-post="/createplayer" hx-indicator=".join-game" hx-target="#body" class="shadow border-text border-2 hover:text-primary hover:border-primary focus:bg-primary focus:text-background focus:border-primary focus:shadow-outline focus:outline-none font-bold py-2 px-4 rounded" type="button">
-						Join Game
-					</button>
-				</div>
-			</div>
-		</form>
-		<div class="join-game hidden md:items-center mt-6">
-			<div class="md:w-1/3"></div>
-			<div class="md:w-2/3 font-bold">
-				Loading...
-			</div>
-		</div>
-		<div id="error" class="mt-6 text-primary font-medium">
-			for _, error := range errors {
-				<p class="block">{ error }</p>
-			}
-		</div>
-	</div>
 }

@@ -1,0 +1,43 @@
+package views
+
+import "main/datatypes"
+import "strconv"
+
+templ Game(player datatypes.Player, presents []datatypes.Present, players []datatypes.Player) {
+	<div hx-ext="sse" ws-connect={ "/client/" + strconv.Itoa(player.Id) } class="flex flex-row h-screen">
+		@Presents(presents)
+		@Players(players)
+	</div>
+	<script>
+    document.body.addEventListener('htmx:wsOpen', function(evt) {
+      console.log('connected');
+    });
+  </script>
+}
+
+templ Presents(presents []datatypes.Present) {
+	<div class="w-full min-h-full" id="presents">
+		for _, present := range presents {
+			<div>
+				{ present.Name }
+				<div class="flex">
+					for _, tag := range present.Tags {
+						<div class="bg-tertiary rounded-lg p-2">
+							{ tag }
+						</div>
+					}
+				</div>
+			</div>
+		}
+	</div>
+}
+
+templ Players(players []datatypes.Player) {
+	<div class="w-[40rem] min-h-full bg-background-two" id="players">
+		for _, player := range players {
+			<div>
+				{ player.Name }
+			</div>
+		}
+	</div>
+}

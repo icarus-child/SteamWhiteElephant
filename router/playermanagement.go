@@ -1,40 +1,57 @@
 package router
 
 import (
+	"main/datatypes"
 	"main/steam"
+	"main/views"
+	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
-type Player struct {
-	Id   int
-	Name string
-}
-
-type Present struct {
-	Id       int
-	SteamUrl string
-	tags     []string
-}
-
-var (
-	players  map[int]Player  = make(map[int]Player)
-	presents map[int]Present = make(map[int]Present)
-)
-
 func createplayer(ctx *gin.Context) {
-	player := Player{
+	var errors []string
+
+	player := datatypes.Player{
 		Id: int(uuid.New().ID()),
 	}
 	player.Name = ctx.PostForm("name")
 
-	present := Present{
+	present := datatypes.Present{
 		Id:       int(uuid.New().ID()),
 		SteamUrl: steam.GetGameUrl(ctx.PostForm("game-id")),
+		Wrapped:  true,
 	}
-	present.tags = steam.GetGameTags(present.SteamUrl)
 
-	players[player.Id] = player
-	presents[present.Id] = present
+	if len(player.Name) == 0 {
+		errors = append(errors, "Name cannot be blank")
+	}
+
+	if len(ctx.PostForm("game-id")) == 0 {
+		errors = append(errors, "Steam game ID cannot be blank")
+	} else {
+		present.Name, present.Tags = steam.GetGameInfo(present.SteamUrl)
+		if present.Name == "" {
+			errors = append(errors, "Could not find that game")
+		}
+	}
+
+	if len(errors) > 0 {
+		Render(ctx, http.StatusOK, views.Form(errors...))
+		return
+	}
+
+	present.Player = &player
+
+	datatypes.PlayersLock.Lock()
+	datatypes.Players[player.Id] = player
+	datatypes.PlayersLock.Unlock()
+
+	datatypes.PresentsLock.Lock()
+	datatypes.Presents[present.Id] = present
+	datatypes.PresentsLock.Unlock()
+
+	ctx.Header("HX-Redirect", "/"+strconv.Itoa(player.Id)+"/game")
 }

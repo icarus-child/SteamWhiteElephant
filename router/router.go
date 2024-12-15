@@ -1,6 +1,8 @@
 package router
 
 import (
+	"main/websocket"
+
 	"github.com/a-h/templ"
 	"github.com/gin-gonic/gin"
 )
@@ -13,6 +15,15 @@ func InitRouter() *gin.Engine {
 	r.GET("/:id/game", game)
 
 	r.POST("/createplayer", createplayer)
+	r.GET("/gamename", getgamename)
+
+	r.GET("/ws", websocket.Test)
+	r.GET("/client/:id", websocket.Connect)
+	r.GET("/sseclient/:id", websocket.SSE)
+
+	r.NoRoute(func(c *gin.Context) {
+		c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
+	})
 
 	return r
 }
