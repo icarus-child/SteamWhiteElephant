@@ -1,11 +1,11 @@
 package websocket
 
 import (
-	// "bytes"
+	"bytes"
 	"main/datatypes"
-	// "main/views"
-	// "maps"
-	// "slices"
+	"main/views"
+	"maps"
+	"slices"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -17,8 +17,9 @@ func SSE(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
+	var player datatypes.Player
 	var ok bool
-	if _, ok = datatypes.Players[playerid_int]; !ok {
+	if player, ok = datatypes.Players[playerid_int]; !ok {
 		return
 	}
 	var client *datatypes.Client
@@ -32,17 +33,17 @@ func SSE(ctx *gin.Context) {
 		select {
 		case _ = <-client.UpdatePresents:
 			println("present")
-			// presents := views.Presents(slices.Collect(maps.Values(datatypes.Presents)), )
-			// var buffer bytes.Buffer
-			// presents.Render(ctx, &buffer)
-			// ctx.SSEvent("presents", buffer.String())
+			presents := views.Presents(slices.Collect(maps.Values(datatypes.Presents)), player, datatypes.Turn)
+			var buffer bytes.Buffer
+			presents.Render(ctx, &buffer)
+			ctx.SSEvent("presents", buffer.String())
 			return
 		case _ = <-client.UpdatePlayers:
 			println("player")
-			// players := views.Players(slices.Collect(maps.Values(datatypes.Players)), 0)
-			// var buffer bytes.Buffer
-			// players.Render(ctx, &buffer)
-			// ctx.SSEvent("players", buffer.String())
+			players := views.Players(slices.Collect(maps.Values(datatypes.Players)), player, datatypes.Turn)
+			var buffer bytes.Buffer
+			players.Render(ctx, &buffer)
+			ctx.SSEvent("players", buffer.String())
 			return
 		case <-ctx.Done():
 			return

@@ -13,10 +13,10 @@ func InitRouter() *gin.Engine {
 
 	r.GET("/", index)
 	r.GET("/:id/game", game)
-	r.GET("/test/game", testgame)
 
 	r.POST("/createplayer", createplayer)
 	r.GET("/gamename", getgamename)
+	r.GET("/startgame", startgame)
 
 	r.GET("/sseclient/:id", websocket.SSE)
 

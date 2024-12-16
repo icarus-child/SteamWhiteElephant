@@ -26,7 +26,3 @@ func game(ctx *gin.Context) {
 		datatypes.Turn,
 	)))
 }
-
-func testgame(ctx *gin.Context) {
-	Render(ctx, http.StatusOK, views.Index(views.TestGame()))
-}
