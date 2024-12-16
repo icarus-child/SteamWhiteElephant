@@ -1,14 +1,24 @@
-<div hx-ext=\"sse\" ws-connect=\"
-\" class=\"flex flex-row h-screen\">
-</div><script>\r\n    document.body.addEventListener('htmx:wsOpen', function(evt) {\r\n      console.log('connected');\r\n    });\r\n  </script>
-<div class=\"w-full min-h-full\" id=\"presents\">
-<div>
-<div class=\"flex\">
-<div class=\"bg-tertiary rounded-lg p-2\">
-</div>
+<div hx-ext=\"sse\" sse-connect=\"
+\" class=\"flex md:flex-row flex-col md:h-screen md:overflow-y-auto\"><div class=\"w-full md:min-h-full p-5 flex flex-col gap-5\" sse-swap=\"presents\">
+</div><div class=\"md:w-[40rem] md:min-h-full w-full bg-backgroundtwo p-5 md:overflow-y-auto\" sse-swap=\"players\">
 </div></div>
+<div class=\"bg-tertiarytransparent rounded-lg p-2 border-2 border-tertiary w-fit\">
+<span class=\"font-bold\"><i>[ Wrapped ]</i></span>
+<div class=\"font-bold\">
+</div><div class=\"text-primary\"><i>
+</i></div>
+<div class=\"flex gap-2 mt-2\">
+<div class=\"border-primary text-primary border-2 rounded-lg px-1\">
 </div>
-<div class=\"w-[40rem] min-h-full bg-background-two\" id=\"players\">
+</div>
+<div class=\"mt-2\"><a target=\"_blank\" href=\"
+\"><span class=\"underline\">Steam Page</span></a></div>
+<button type=\"button\" class=\"mt-4 border-tertiary text-tertiary border-2 font-bold py-2 px-4 rounded\" disabled>
+</button>
+<button type=\"button\" class=\"mt-4 border-text border-2 hover:text-primary hover:border-primary focus:bg-primary focus:text-background focus:border-primary font-bold py-2 px-4 rounded\">
+</button>
+</div>
+<div class=\"text-tertiary\">-> 
+</div>
 <div>
-</div>
 </div>

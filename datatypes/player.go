@@ -2,13 +2,12 @@ package datatypes
 
 import (
 	"sync"
-
-	"github.com/gorilla/websocket"
 )
 
 type Player struct {
-	Id   int
-	Name string
+	Id         int
+	Name       string
+	HasPresent bool
 }
 
 type Present struct {
@@ -18,12 +17,13 @@ type Present struct {
 	Tags     []string
 	Wrapped  bool
 	Player   *Player
+	Gifter   *Player
 }
 
 type Client struct {
-	Conn *websocket.Conn
-	Send chan []byte
-	Id   int
+	UpdatePresents chan byte
+	UpdatePlayers  chan byte
+	Id             int
 }
 
 var (
@@ -32,13 +32,16 @@ var (
 	Clients  map[int]*Client = make(map[int]*Client)
 )
 
+var PlayersOrder []*Player = make([]*Player, 0)
+
+var Turn *Player = nil
+
 var (
 	PlayersLock  = sync.Mutex{}
 	PresentsLock = sync.Mutex{}
 	ClientsLock  = sync.Mutex{}
+	TurnLock     = sync.Mutex{}
 )
 
-var (
-	UpdatePresents chan byte = make(chan byte, 1)
-	UpdatePlayers  chan byte = make(chan byte, 1)
-)
+func NextTurn() {
+}

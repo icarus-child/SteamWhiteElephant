@@ -15,7 +15,8 @@ func createplayer(ctx *gin.Context) {
 	var errors []string
 
 	player := datatypes.Player{
-		Id: int(uuid.New().ID()),
+		Id:         int(uuid.New().ID()),
+		HasPresent: false,
 	}
 	player.Name = ctx.PostForm("name")
 
@@ -23,6 +24,8 @@ func createplayer(ctx *gin.Context) {
 		Id:       int(uuid.New().ID()),
 		SteamUrl: steam.GetGameUrl(ctx.PostForm("game-id")),
 		Wrapped:  true,
+		Player:   nil,
+		Gifter:   &player,
 	}
 
 	if len(player.Name) == 0 {
@@ -43,8 +46,6 @@ func createplayer(ctx *gin.Context) {
 		return
 	}
 
-	present.Player = &player
-
 	datatypes.PlayersLock.Lock()
 	datatypes.Players[player.Id] = player
 	datatypes.PlayersLock.Unlock()
@@ -53,5 +54,20 @@ func createplayer(ctx *gin.Context) {
 	datatypes.Presents[present.Id] = present
 	datatypes.PresentsLock.Unlock()
 
+	go updateplayers()
+	go updatepresents()
+
 	ctx.Header("HX-Redirect", "/"+strconv.Itoa(player.Id)+"/game")
+}
+
+func updateplayers() {
+	for _, c := range datatypes.Clients {
+		c.UpdatePlayers <- 0b1
+	}
+}
+
+func updatepresents() {
+	for _, c := range datatypes.Clients {
+		c.UpdatePresents <- 0b1
+	}
 }

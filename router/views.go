@@ -19,6 +19,14 @@ func game(ctx *gin.Context) {
 	playerid := ctx.Param("id")
 	playerid_int, _ := strconv.Atoi(playerid)
 	player := datatypes.Players[playerid_int]
-	println(player.Id)
-	Render(ctx, http.StatusOK, views.Index(views.Game(player, slices.Collect(maps.Values(datatypes.Presents)), slices.Collect(maps.Values(datatypes.Players)))))
+	Render(ctx, http.StatusOK, views.Index(views.Game(
+		player,
+		slices.Collect(maps.Values(datatypes.Presents)),
+		slices.Collect(maps.Values(datatypes.Players)),
+		datatypes.Turn,
+	)))
+}
+
+func testgame(ctx *gin.Context) {
+	Render(ctx, http.StatusOK, views.Index(views.TestGame()))
 }

@@ -7,8 +7,9 @@ module.exports = {
       primary: "var(--color-primary)",
       secondary: "var(--color-secondary)",
       background: "var(--color-background)",
-      background: "var(--color-background-two)",
+      backgroundtwo: "var(--color-background-two)",
       tertiary: "var(--color-tertiary)",
+      tertiarytransparent: "var(--color-tertiary-transparent)",
       text: "var(--color-text)",
     },
     //fontFamily: {
