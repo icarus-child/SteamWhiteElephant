@@ -4,89 +4,89 @@ import "main/datatypes"
 import "strconv"
 
 templ Game(player *datatypes.Player, presents []*datatypes.Present, players []*datatypes.Player, turn *datatypes.Player) {
-	<div hx-ext="ws" sse-connect={ "/sseclient/" + strconv.Itoa(player.Id) } class="flex md:flex-row flex-col md:h-screen md:overflow-y-auto">
-		<div class="w-full md:min-h-full p-5 flex flex-col gap-5" sse-swap="presents">
-			@Presents(presents, player, turn)
-		</div>
-		<div class="md:w-[40rem] md:min-h-full w-full bg-backgroundtwo p-5 md:overflow-y-auto" sse-swap="players">
-			@Players(players, player, turn)
-		</div>
+	<div hx-ext="ws" ws-connect={ "/ws/" + strconv.Itoa(player.Id) } class="flex md:flex-row flex-col md:h-screen md:overflow-y-auto">
+		@Presents(presents, player, turn)
+		@Players(players, player, turn)
 	</div>
 }
 
 templ Presents(presents []*datatypes.Present, player *datatypes.Player, turn *datatypes.Player) {
-	for _, present := range presents {
-		<div class="bg-tertiarytransparent rounded-lg p-2 border-2 border-tertiary w-fit">
-			if present.Wrapped {
-				<span class="font-bold"><i>[ Wrapped ]</i></span>
-			} else {
-				<div class="font-bold">
-					{ present.Name }
-				</div>
-				<div class="text-primary">
-					<i>{ present.Player.Name }</i>
-				</div>
-			}
-			<div class="flex gap-2 mt-2">
-				for _, tag := range present.Tags {
-					<div class="border-primary text-primary border-2 rounded-lg px-1">
-						{ tag }
+	<div class="w-full md:min-h-full p-5 flex flex-col gap-5" id="presents">
+		for _, present := range presents {
+			<div class="bg-tertiarytransparent rounded-lg p-2 border-2 border-tertiary w-fit">
+				if present.Wrapped {
+					<span class="font-bold"><i>[ Wrapped ]</i></span>
+				} else {
+					<div class="font-bold">
+						{ present.Name }
+					</div>
+					<div class="text-primary">
+						<i>{ present.Player.Name }</i>
 					</div>
 				}
-			</div>
-			if !present.Wrapped {
-				<div class="mt-2"><a target="_blank" href={ templ.SafeURL(present.SteamUrl) }><span class="underline text-link"><i>Steam Page</i></span></a></div>
-			}
-			{{
+				<div class="flex gap-2 mt-2">
+					for _, tag := range present.Tags {
+						<div class="border-primary text-primary border-2 rounded-lg px-1">
+							{ tag }
+						</div>
+					}
+				</div>
+				if !present.Wrapped {
+					<div class="mt-2"><a target="_blank" href={ templ.SafeURL(present.SteamUrl) }><span class="underline text-link"><i>Steam Page</i></span></a></div>
+				}
+				{{
 	var buttoninner string
 	var getendpoint string = ""
-			}}
-			if present.Player != nil && present.Player.Id == player.Id {
-				{{ buttoninner = "Yours :)" }}
-			} else {
-				if present.Wrapped {
-					{{
+				}}
+				if present.Player != nil && present.Player.Id == player.Id {
+					{{ buttoninner = "Yours :)" }}
+				} else {
+					if present.Wrapped {
+						{{
 	buttoninner = "Take"
 	getendpoint = "/take"
-					}}
-				} else {
-					{{
+						}}
+					} else {
+						{{
 	buttoninner = "Swap"
 	getendpoint = "/swap"
-					}}
+						}}
+					}
 				}
-			}
-			if turn != nil {
-				if (present.Player != nil && present.Player.Id == player.Id) || player.Id != turn.Id {
-					<button type="button" class="mt-4 border-tertiary text-tertiary border-2 font-bold py-2 px-4 rounded" disabled>
-						{ buttoninner }
-					</button>
-				} else {
-					<button hx-get={ getendpoint } hx-vals={ "{\"presentid\": \"" + strconv.Itoa(present.Id) + "\", \"playerid\": \"" + strconv.Itoa(player.Id) + "\"}" } type="button" class="mt-4 border-text border-2 hover:text-primary hover:border-primary focus:bg-primary focus:text-background focus:border-primary font-bold py-2 px-4 rounded">
-						{ buttoninner }
-					</button>
+				if turn != nil {
+					if (present.Player != nil && present.Player.Id == player.Id) || player.Id != turn.Id {
+						<button type="button" class="mt-4 border-tertiary text-tertiary border-2 font-bold py-2 px-4 rounded" disabled>
+							{ buttoninner }
+						</button>
+					} else {
+						<button hx-get={ getendpoint } hx-vals={ "{\"presentid\": \"" + strconv.Itoa(present.Id) + "\", \"playerid\": \"" + strconv.Itoa(player.Id) + "\"}" } type="button" class="mt-4 border-text border-2 hover:text-primary hover:border-primary focus:bg-primary focus:text-background focus:border-primary font-bold py-2 px-4 rounded">
+							{ buttoninner }
+						</button>
+					}
 				}
-			}
-		</div>
-	}
+			</div>
+		}
+	</div>
 }
 
 templ Players(players []*datatypes.Player, curr_player *datatypes.Player, turn *datatypes.Player) {
-	for _, player := range players {
-		{{
+	<div class="md:w-[40rem] md:min-h-full w-full bg-backgroundtwo p-5 md:overflow-y-auto" id="players">
+		for _, player := range players {
+			{{
 	playername := player.Name
 	if player.Id == curr_player.Id {
 		playername = playername + " (You)"
 	}
-		}}
-		if turn != nil && player.Id == turn.Id {
-			<div class="text-tertiary">
-				-> { playername }
-			</div>
-		} else {
-			<div>
-				{ playername }
-			</div>
+			}}
+			if turn != nil && player.Id == turn.Id {
+				<div class="text-tertiary">
+					-> { playername }
+				</div>
+			} else {
+				<div>
+					{ playername }
+				</div>
+			}
 		}
-	}
+	</div>
 }

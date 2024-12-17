@@ -10,6 +10,7 @@ import (
 func InitRouter() *gin.Engine {
 	r := gin.Default()
 	r.Static("static", "static")
+	r.StaticFile("favicon.ico", "./static/favicon.ico")
 
 	r.GET("/", index)
 	r.GET("/:id/game", game)
@@ -21,7 +22,7 @@ func InitRouter() *gin.Engine {
 	r.GET("/take", takepresent)
 	r.GET("/swap", swappresent)
 
-	r.GET("/sseclient/:id", websocket.SSE)
+	r.GET("/ws/:id", websocket.WS)
 
 	r.NoRoute(func(c *gin.Context) {
 		c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})

@@ -2,6 +2,8 @@ package datatypes
 
 import (
 	"sync"
+
+	"github.com/gorilla/websocket"
 )
 
 type Player struct {
@@ -21,9 +23,9 @@ type Present struct {
 }
 
 type Client struct {
-	UpdatePresents chan byte
-	UpdatePlayers  chan byte
-	Id             int
+	Conn   *websocket.Conn
+	Update chan byte
+	Id     int
 }
 
 var (

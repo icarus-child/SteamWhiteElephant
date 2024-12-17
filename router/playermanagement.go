@@ -67,8 +67,7 @@ func createplayer(ctx *gin.Context) {
 
 func updateplayers() {
 	for _, c := range datatypes.Clients {
-		c.UpdatePlayers <- 0b1
-		c.UpdatePresents <- 0b1
+		c.Update <- 0b1
 	}
 }
 
@@ -85,5 +84,5 @@ func startgame(ctx *gin.Context) {
 		datatypes.PlayersOrder[i], datatypes.PlayersOrder[j] = datatypes.PlayersOrder[j], datatypes.PlayersOrder[i]
 	}
 	datatypes.Turn = datatypes.PlayersOrder[0]
-	updateplayers()
+	go updateplayers()
 }
