@@ -22,6 +22,3 @@ func getgamename(ctx *gin.Context) {
 	ctx.Writer.WriteString(gamename)
 	return
 }
-
-func startgame(ctx *gin.Context) {
-}

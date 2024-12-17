@@ -4,11 +4,14 @@ import (
 	"main/datatypes"
 	"main/steam"
 	"main/views"
+	"maps"
 	"net/http"
+	"slices"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"golang.org/x/exp/rand"
 )
 
 func createplayer(ctx *gin.Context) {
@@ -47,15 +50,17 @@ func createplayer(ctx *gin.Context) {
 	}
 
 	datatypes.PlayersLock.Lock()
-	datatypes.Players[player.Id] = player
+	datatypes.Players[player.Id] = &player
+	if datatypes.Turn != nil {
+		datatypes.PlayersOrder = append(datatypes.PlayersOrder, &player)
+	}
 	datatypes.PlayersLock.Unlock()
 
 	datatypes.PresentsLock.Lock()
-	datatypes.Presents[present.Id] = present
+	datatypes.Presents[present.Id] = &present
 	datatypes.PresentsLock.Unlock()
 
 	go updateplayers()
-	go updatepresents()
 
 	ctx.Header("HX-Redirect", "/"+strconv.Itoa(player.Id)+"/game")
 }
@@ -63,11 +68,22 @@ func createplayer(ctx *gin.Context) {
 func updateplayers() {
 	for _, c := range datatypes.Clients {
 		c.UpdatePlayers <- 0b1
+		c.UpdatePresents <- 0b1
 	}
 }
 
-func updatepresents() {
-	for _, c := range datatypes.Clients {
-		c.UpdatePresents <- 0b1
+func startgame(ctx *gin.Context) {
+	for _, v := range datatypes.PlayersOrder {
+		println(v.Name)
 	}
+	if datatypes.Turn != nil {
+		return
+	}
+	datatypes.PlayersOrder = slices.Collect(maps.Values(datatypes.Players))
+	for i := range datatypes.PlayersOrder {
+		j := rand.Intn(i + 1)
+		datatypes.PlayersOrder[i], datatypes.PlayersOrder[j] = datatypes.PlayersOrder[j], datatypes.PlayersOrder[i]
+	}
+	datatypes.Turn = datatypes.PlayersOrder[0]
+	updateplayers()
 }

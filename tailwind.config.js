@@ -11,6 +11,7 @@ module.exports = {
       tertiary: "var(--color-tertiary)",
       tertiarytransparent: "var(--color-tertiary-transparent)",
       text: "var(--color-text)",
+      link: "var(--color-link)",
     },
     //fontFamily: {
     //  display: ["Kelsi"],

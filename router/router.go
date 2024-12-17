@@ -18,6 +18,9 @@ func InitRouter() *gin.Engine {
 	r.GET("/gamename", getgamename)
 	r.GET("/startgame", startgame)
 
+	r.GET("/take", takepresent)
+	r.GET("/swap", swappresent)
+
 	r.GET("/sseclient/:id", websocket.SSE)
 
 	r.NoRoute(func(c *gin.Context) {

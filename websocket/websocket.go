@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strconv"
 
+	"github.com/a-h/templ"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,7 +18,7 @@ func SSE(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	var player datatypes.Player
+	var player *datatypes.Player
 	var ok bool
 	if player, ok = datatypes.Players[playerid_int]; !ok {
 		return
@@ -40,7 +41,12 @@ func SSE(ctx *gin.Context) {
 			return
 		case _ = <-client.UpdatePlayers:
 			println("player")
-			players := views.Players(slices.Collect(maps.Values(datatypes.Players)), player, datatypes.Turn)
+			var players templ.Component
+			if len(datatypes.PlayersOrder) > 0 {
+				players = views.Players(datatypes.PlayersOrder, player, datatypes.Turn)
+			} else {
+				players = views.Players(slices.Collect(maps.Values(datatypes.Players)), player, datatypes.Turn)
+			}
 			var buffer bytes.Buffer
 			players.Render(ctx, &buffer)
 			ctx.SSEvent("players", buffer.String())

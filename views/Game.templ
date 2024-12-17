@@ -3,8 +3,8 @@ package views
 import "main/datatypes"
 import "strconv"
 
-templ Game(player datatypes.Player, presents []datatypes.Present, players []datatypes.Player, turn *datatypes.Player) {
-	<div hx-ext="sse" sse-connect={ "/sseclient/" + strconv.Itoa(player.Id) } class="flex md:flex-row flex-col md:h-screen md:overflow-y-auto">
+templ Game(player *datatypes.Player, presents []*datatypes.Present, players []*datatypes.Player, turn *datatypes.Player) {
+	<div hx-ext="ws" sse-connect={ "/sseclient/" + strconv.Itoa(player.Id) } class="flex md:flex-row flex-col md:h-screen md:overflow-y-auto">
 		<div class="w-full md:min-h-full p-5 flex flex-col gap-5" sse-swap="presents">
 			@Presents(presents, player, turn)
 		</div>
@@ -14,7 +14,7 @@ templ Game(player datatypes.Player, presents []datatypes.Present, players []data
 	</div>
 }
 
-templ Presents(presents []datatypes.Present, player datatypes.Player, turn *datatypes.Player) {
+templ Presents(presents []*datatypes.Present, player *datatypes.Player, turn *datatypes.Player) {
 	for _, present := range presents {
 		<div class="bg-tertiarytransparent rounded-lg p-2 border-2 border-tertiary w-fit">
 			if present.Wrapped {
@@ -35,16 +35,25 @@ templ Presents(presents []datatypes.Present, player datatypes.Player, turn *data
 				}
 			</div>
 			if !present.Wrapped {
-				<div class="mt-2"><a target="_blank" href={ templ.SafeURL(present.SteamUrl) }><span class="underline">Steam Page</span></a></div>
+				<div class="mt-2"><a target="_blank" href={ templ.SafeURL(present.SteamUrl) }><span class="underline text-link"><i>Steam Page</i></span></a></div>
 			}
-			{{ var buttoninner string }}
+			{{
+	var buttoninner string
+	var getendpoint string = ""
+			}}
 			if present.Player != nil && present.Player.Id == player.Id {
 				{{ buttoninner = "Yours :)" }}
 			} else {
 				if present.Wrapped {
-					{{ buttoninner = "Take" }}
+					{{
+	buttoninner = "Take"
+	getendpoint = "/take"
+					}}
 				} else {
-					{{ buttoninner = "Swap" }}
+					{{
+	buttoninner = "Swap"
+	getendpoint = "/swap"
+					}}
 				}
 			}
 			if turn != nil {
@@ -53,7 +62,7 @@ templ Presents(presents []datatypes.Present, player datatypes.Player, turn *data
 						{ buttoninner }
 					</button>
 				} else {
-					<button type="button" class="mt-4 border-text border-2 hover:text-primary hover:border-primary focus:bg-primary focus:text-background focus:border-primary font-bold py-2 px-4 rounded">
+					<button hx-get={ getendpoint } hx-vals={ "{\"presentid\": \"" + strconv.Itoa(present.Id) + "\", \"playerid\": \"" + strconv.Itoa(player.Id) + "\"}" } type="button" class="mt-4 border-text border-2 hover:text-primary hover:border-primary focus:bg-primary focus:text-background focus:border-primary font-bold py-2 px-4 rounded">
 						{ buttoninner }
 					</button>
 				}
@@ -62,15 +71,21 @@ templ Presents(presents []datatypes.Present, player datatypes.Player, turn *data
 	}
 }
 
-templ Players(players []datatypes.Player, player datatypes.Player, turn *datatypes.Player) {
+templ Players(players []*datatypes.Player, curr_player *datatypes.Player, turn *datatypes.Player) {
 	for _, player := range players {
+		{{
+	playername := player.Name
+	if player.Id == curr_player.Id {
+		playername = playername + " (You)"
+	}
+		}}
 		if turn != nil && player.Id == turn.Id {
 			<div class="text-tertiary">
-				-> { player.Name }
+				-> { playername }
 			</div>
 		} else {
 			<div>
-				{ player.Name }
+				{ playername }
 			</div>
 		}
 	}

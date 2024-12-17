@@ -1,4 +1,4 @@
-<div hx-ext=\"sse\" sse-connect=\"
+<div hx-ext=\"ws\" sse-connect=\"
 \" class=\"flex md:flex-row flex-col md:h-screen md:overflow-y-auto\"><div class=\"w-full md:min-h-full p-5 flex flex-col gap-5\" sse-swap=\"presents\">
 </div><div class=\"md:w-[40rem] md:min-h-full w-full bg-backgroundtwo p-5 md:overflow-y-auto\" sse-swap=\"players\">
 </div></div>
@@ -12,10 +12,12 @@
 </div>
 </div>
 <div class=\"mt-2\"><a target=\"_blank\" href=\"
-\"><span class=\"underline\">Steam Page</span></a></div>
+\"><span class=\"underline text-link\"><i>Steam Page</i></span></a></div>
 <button type=\"button\" class=\"mt-4 border-tertiary text-tertiary border-2 font-bold py-2 px-4 rounded\" disabled>
 </button>
-<button type=\"button\" class=\"mt-4 border-text border-2 hover:text-primary hover:border-primary focus:bg-primary focus:text-background focus:border-primary font-bold py-2 px-4 rounded\">
+<button hx-get=\"
+\" hx-vals=\"
+\" type=\"button\" class=\"mt-4 border-text border-2 hover:text-primary hover:border-primary focus:bg-primary focus:text-background focus:border-primary font-bold py-2 px-4 rounded\">
 </button>
 </div>
 <div class=\"text-tertiary\">-> 

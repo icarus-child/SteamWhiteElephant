@@ -27,14 +27,17 @@ type Client struct {
 }
 
 var (
-	Players  map[int]Player  = make(map[int]Player)
-	Presents map[int]Present = make(map[int]Present)
-	Clients  map[int]*Client = make(map[int]*Client)
+	Players  map[int]*Player  = make(map[int]*Player)
+	Presents map[int]*Present = make(map[int]*Present)
+	Clients  map[int]*Client  = make(map[int]*Client)
 )
 
 var PlayersOrder []*Player = make([]*Player, 0)
 
-var Turn *Player = nil
+var (
+	Turn     *Player = nil
+	GameOver bool    = false
+)
 
 var (
 	PlayersLock  = sync.Mutex{}
@@ -44,4 +47,12 @@ var (
 )
 
 func NextTurn() {
+	for _, player := range PlayersOrder {
+		if !player.HasPresent {
+			println(player.Name + "'s turn")
+			Turn = player
+			return
+		}
+	}
+	GameOver = true
 }
