@@ -22,6 +22,8 @@
 <button ws-send hx-vals=\"
 \" type=\"button\" class=\"mt-4 border-text border-2 hover:text-primary hover:border-primary focus:bg-primary focus:text-background focus:border-primary font-bold py-2 px-4 rounded\">
 </button>
+<button type=\"button\" class=\"mt-4 border-tertiary text-tertiary border-2 font-bold py-2 px-4 rounded\" disabled>
+</button>
 </div>
 </div>
 <div class=\"md:w-[40rem] md:min-h-full w-full bg-backgroundtwo p-5\" id=\"players\">
