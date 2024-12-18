@@ -4,6 +4,7 @@ import (
 	"main/datatypes"
 	"main/steam"
 	"main/views"
+	"main/websocket"
 	"maps"
 	"net/http"
 	"slices"
@@ -15,6 +16,10 @@ import (
 )
 
 func createplayer(ctx *gin.Context) {
+	if datatypes.GameOver {
+		return
+	}
+
 	var errors []string
 
 	player := datatypes.Player{
@@ -60,15 +65,9 @@ func createplayer(ctx *gin.Context) {
 	datatypes.Presents[present.Id] = &present
 	datatypes.PresentsLock.Unlock()
 
-	go updateplayers()
+	go websocket.UpdatePlayers()
 
 	ctx.Header("HX-Redirect", "/"+strconv.Itoa(player.Id)+"/game")
-}
-
-func updateplayers() {
-	for _, c := range datatypes.Clients {
-		c.Update <- 0b1
-	}
 }
 
 func startgame(ctx *gin.Context) {
@@ -84,5 +83,5 @@ func startgame(ctx *gin.Context) {
 		datatypes.PlayersOrder[i], datatypes.PlayersOrder[j] = datatypes.PlayersOrder[j], datatypes.PlayersOrder[i]
 	}
 	datatypes.Turn = datatypes.PlayersOrder[0]
-	go updateplayers()
+	go websocket.UpdatePlayers()
 }

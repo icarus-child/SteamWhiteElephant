@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"main/datatypes"
@@ -24,7 +25,6 @@ const (
 )
 
 func WS(ctx *gin.Context) {
-	println("ws hit")
 	playerid := ctx.Param("id")
 	playerid_int, err := strconv.Atoi(playerid)
 	if err != nil {
@@ -57,7 +57,6 @@ func WritePump(client *datatypes.Client, player *datatypes.Player, ctx *gin.Cont
 	for {
 		select {
 		case _ = <-client.Update:
-			println("update hit")
 			updatepresents(ctx, player, client)
 			updateplayers(ctx, player, client)
 			return
@@ -84,13 +83,30 @@ func ReadPump(client *datatypes.Client, player *datatypes.Player, ctx *gin.Conte
 		return nil
 	})
 	for {
-		_, _, err := client.Conn.ReadMessage()
+		_, message, err := client.Conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("error: %v", err)
 			}
 			break
 		}
+
+		var json_msg map[string]interface{}
+		err = json.Unmarshal(message, &json_msg)
+		if err != nil {
+			log.Printf("error: %v", err)
+			break
+		}
+
+		takepresent(int(json_msg["presentid"].(float64)), int(json_msg["playerid"].(float64)))
+		if datatypes.GameOver {
+			println("GAME OVER")
+		}
+
+		updatepresents(ctx, player, client)
+		updateplayers(ctx, player, client)
+		UpdatePlayers()
+		return
 	}
 }
 
@@ -140,4 +156,10 @@ func updateplayers(ctx *gin.Context, player *datatypes.Player, client *datatypes
 	}
 	defer w.Close()
 	players.Render(ctx, w)
+}
+
+func UpdatePlayers() {
+	for _, c := range datatypes.Clients {
+		c.Update <- 0b1
+	}
 }

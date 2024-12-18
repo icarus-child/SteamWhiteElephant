@@ -12,6 +12,10 @@
     --color-tertiary: #e278ff;
     --color-tertiary-transparent: #e278ff70;
     --color-link: #d9ebb9;
+    --color-yours: #ff0095;
+    --color-yours-transparent: #ff009570;
+    --color-gifted: #5900ff;
+    --color-gifted-transparent: #5900ff70;
   }
 }
 

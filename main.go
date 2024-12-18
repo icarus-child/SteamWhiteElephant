@@ -10,6 +10,6 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := router.InitRouter()
 	r.SetTrustedProxies(nil)
-	// r.Run(":80")
-	r.RunTLS(":443", "domain.cert.pem", "private.key.pem")
+	r.Run(":80")
+	// r.RunTLS(":443", "domain.cert.pem", "private.key.pem")
 }

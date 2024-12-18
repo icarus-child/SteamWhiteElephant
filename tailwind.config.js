@@ -12,6 +12,10 @@ module.exports = {
       tertiarytransparent: "var(--color-tertiary-transparent)",
       text: "var(--color-text)",
       link: "var(--color-link)",
+      yours: "var(--color-yours)",
+      yourstransparent: "var(--color-yours-transparent)",
+      gifted: "var(--color-gifted)",
+      giftedtransparent: "var(--color-gifted-transparent)",
     },
     //fontFamily: {
     //  display: ["Kelsi"],
