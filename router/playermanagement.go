@@ -34,6 +34,7 @@ func createplayer(ctx *gin.Context) {
 		Wrapped:  true,
 		Player:   nil,
 		Gifter:   &player,
+		Stolen:   false,
 	}
 
 	if len(player.Name) == 0 {

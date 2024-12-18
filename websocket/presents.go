@@ -10,7 +10,11 @@ func takepresent(presentid int, playerid int) {
 
 	if present.Wrapped {
 		present.Wrapped = false
+		for _, v := range datatypes.Presents {
+			v.Stolen = false
+		}
 	} else {
+		present.Stolen = true
 		victim := present.Player
 		victim.HasPresent = false
 	}

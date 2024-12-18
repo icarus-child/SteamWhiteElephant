@@ -20,6 +20,7 @@ type Present struct {
 	Wrapped  bool
 	Player   *Player
 	Gifter   *Player
+	Stolen   bool
 }
 
 type Client struct {

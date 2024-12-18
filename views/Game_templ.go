@@ -234,13 +234,16 @@ func Presents(presents []*datatypes.Present, player *datatypes.Player, turn *dat
 				if present.Wrapped {
 
 					buttoninner = "Take 😇"
+				} else if present.Stolen {
+
+					buttoninner = "Stolen this turn 🔒"
 				} else {
 
 					buttoninner = "Steal 😈"
 				}
 			}
-			if turn != nil && !datatypes.GameOver {
-				if (present.Player != nil && present.Player.Id == player.Id) || player.Id != turn.Id {
+			if turn != nil || (datatypes.GameOver && (present.Player != nil && present.Player.Id == player.Id)) {
+				if (present.Player != nil && present.Player.Id == player.Id) || player.Id != turn.Id || present.Stolen || datatypes.GameOver {
 					templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 20)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -248,7 +251,7 @@ func Presents(presents []*datatypes.Present, player *datatypes.Player, turn *dat
 					var templ_7745c5c3_Var11 string
 					templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(buttoninner)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/Game.templ`, Line: 74, Col: 20}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/Game.templ`, Line: 78, Col: 20}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 					if templ_7745c5c3_Err != nil {
@@ -266,7 +269,7 @@ func Presents(presents []*datatypes.Present, player *datatypes.Player, turn *dat
 					var templ_7745c5c3_Var12 string
 					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("{\"presentid\": " + strconv.Itoa(present.Id) + ", \"playerid\": " + strconv.Itoa(player.Id) + "}")
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/Game.templ`, Line: 77, Col: 130}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/Game.templ`, Line: 81, Col: 130}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 					if templ_7745c5c3_Err != nil {
@@ -279,7 +282,7 @@ func Presents(presents []*datatypes.Present, player *datatypes.Player, turn *dat
 					var templ_7745c5c3_Var13 string
 					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(buttoninner)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/Game.templ`, Line: 78, Col: 20}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/Game.templ`, Line: 82, Col: 20}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 					if templ_7745c5c3_Err != nil {
@@ -343,7 +346,7 @@ func Players(players []*datatypes.Player, curr_player *datatypes.Player, turn *d
 				var templ_7745c5c3_Var15 string
 				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(playername)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/Game.templ`, Line: 98, Col: 20}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/Game.templ`, Line: 102, Col: 20}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 				if templ_7745c5c3_Err != nil {
@@ -361,7 +364,7 @@ func Players(players []*datatypes.Player, curr_player *datatypes.Player, turn *d
 				var templ_7745c5c3_Var16 string
 				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(playername)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/Game.templ`, Line: 102, Col: 17}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/Game.templ`, Line: 106, Col: 17}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 				if templ_7745c5c3_Err != nil {

@@ -1,7 +1,7 @@
 <div hx-ext=\"ws\" ws-connect=\"
 \" class=\"flex md:flex-row flex-col md:h-screen md:overflow-y-auto\">
 </div>
-<div class=\"w-full md:min-h-full p-5 flex flex-col gap-5\" id=\"presents\">
+<div class=\"w-full md:min-h-full p-5 flex flex-col gap-5 md:overflow-y-auto\" id=\"presents\">
 <div class=\"
 \">
 <div><span class=\"text-primary\"><i>Gifted by you</i></span></div>
@@ -24,7 +24,7 @@
 </button>
 </div>
 </div>
-<div class=\"md:w-[40rem] md:min-h-full w-full bg-backgroundtwo p-5 md:overflow-y-auto\" id=\"players\">
+<div class=\"md:w-[40rem] md:min-h-full w-full bg-backgroundtwo p-5\" id=\"players\">
 <div class=\"text-tertiary\">-> 
 </div>
 <div>

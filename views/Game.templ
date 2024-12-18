@@ -11,7 +11,7 @@ templ Game(player *datatypes.Player, presents []*datatypes.Present, players []*d
 }
 
 templ Presents(presents []*datatypes.Present, player *datatypes.Player, turn *datatypes.Player) {
-	<div class="w-full md:min-h-full p-5 flex flex-col gap-5" id="presents">
+	<div class="w-full md:min-h-full p-5 flex flex-col gap-5 md:overflow-y-auto" id="presents">
 		for _, present := range presents {
 			{{
 	presentstyle := "rounded-lg p-2 border-2 w-fit"
@@ -62,14 +62,18 @@ templ Presents(presents []*datatypes.Present, player *datatypes.Player, turn *da
 						{{
 	buttoninner = "Take 😇"
 						}}
+					} else if present.Stolen {
+						{{
+	buttoninner = "Stolen this turn 🔒"
+						}}
 					} else {
 						{{
 	buttoninner = "Steal 😈"
 						}}
 					}
 				}
-				if turn != nil && !datatypes.GameOver {
-					if (present.Player != nil && present.Player.Id == player.Id) || player.Id != turn.Id {
+				if turn != nil || (datatypes.GameOver && (present.Player != nil && present.Player.Id == player.Id)) {
+					if (present.Player != nil && present.Player.Id == player.Id) || player.Id != turn.Id || present.Stolen || datatypes.GameOver {
 						<button type="button" class="mt-4 border-tertiary text-tertiary border-2 font-bold py-2 px-4 rounded" disabled>
 							{ buttoninner }
 						</button>
@@ -85,7 +89,7 @@ templ Presents(presents []*datatypes.Present, player *datatypes.Player, turn *da
 }
 
 templ Players(players []*datatypes.Player, curr_player *datatypes.Player, turn *datatypes.Player) {
-	<div class="md:w-[40rem] md:min-h-full w-full bg-backgroundtwo p-5 md:overflow-y-auto" id="players">
+	<div class="md:w-[40rem] md:min-h-full w-full bg-backgroundtwo p-5" id="players">
 		for _, player := range players {
 			{{
 	playername := player.Name
