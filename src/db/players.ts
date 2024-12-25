@@ -3,7 +3,7 @@ import { Player } from "@/types/player";
 
 export async function CreatePlayer(id: string, player: Player) {
   console.log(id);
-  fetch("localhost:3333/player", {
+  fetch("http://localhost:3333/player/", {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -16,10 +16,21 @@ export async function CreatePlayer(id: string, player: Player) {
   });
 }
 
-export async function GetPlayer(id: string): Player | undefined {
+type JsonPlayer = {
+  name: string;
+  error: string;
+};
+
+export async function GetPlayer(id: string): Promise<Player | undefined> {
   console.log(id);
-  const response = await fetch("localhost:3333/player?id=" + id, {
+  const response = await fetch("http://localhost:3333/player?id=" + id, {
     method: "GET",
   });
-  response.headers;
+  const json: JsonPlayer = await response.json();
+  if (json.error != null) {
+    return undefined;
+  }
+  return {
+    name: json.name,
+  };
 }
