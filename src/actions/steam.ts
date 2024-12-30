@@ -11,9 +11,15 @@ export type SteamInfo = {
 export async function GetSteamGameName(
   gameId: number,
 ): Promise<string | undefined> {
-  const resp = await fetch(`https://store.steampowered.com/app/${gameId}`);
+  const resp = await fetch(`https://store.steampowered.com/app/${gameId}`, {
+    method: "GET",
+    headers: {
+      Cookie:
+        'birthtime=1041408001; created="Sun, 29 Dec 2024 02:26:46 GMT"; path=/; expires=Session',
+    },
+  });
   if (!resp.ok) {
-    return Promise.resolve(undefined);
+    return Promise.resolve("Failed to contact steam servers");
   }
   const blob = await resp.blob();
   const bodyRaw = await blob.text();
@@ -23,7 +29,13 @@ export async function GetSteamGameName(
 }
 
 export async function GetSteamGameInfo(gameId: number): Promise<SteamInfo> {
-  const resp = await fetch(`https://store.steampowered.com/app/${gameId}`);
+  const resp = await fetch(`https://store.steampowered.com/app/${gameId}`, {
+    method: "GET",
+    headers: {
+      Cookie:
+        'birthtime=1041408001; created="Sun, 29 Dec 2024 02:26:46 GMT"; path=/; expires=Session',
+    },
+  });
   if (!resp.ok) {
     return Promise.resolve({
       name: "",

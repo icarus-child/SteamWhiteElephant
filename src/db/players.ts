@@ -26,7 +26,12 @@ export async function GetPlayer(id: string): Promise<Player | undefined> {
   const response = await fetch("http://localhost:3333/player?id=" + id, {
     method: "GET",
   });
-  const json: JsonPlayer = await response.json();
+  let json: JsonPlayer;
+  try {
+    json = await response.json();
+  } catch (error) {
+    return undefined;
+  }
   if (json.error != null) {
     return undefined;
   }

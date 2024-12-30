@@ -1,11 +1,12 @@
-import WrappedPresent from "./components/WrappedPresent";
+import PresentsDiv from "./elements/PresentsDiv";
+import UsersDiv from "./elements/UsersDiv";
 
 export default function Home() {
   return (
     <div>
-      <div id="topRow" className="bg">
-        <WrappedPresent />
-      </div>
+      <PresentsDiv />
+      <div className="py-10"></div>
+      <UsersDiv />
     </div>
   );
 }

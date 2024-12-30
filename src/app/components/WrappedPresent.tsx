@@ -1,3 +1,11 @@
-export default function PresentPlaceholder() {
-  return <div className="h-40 w-40 bg-white"></div>;
+export type PresentPlaceholderProps = {
+  className: string;
+};
+
+export default function PresentPlaceholder(props: PresentPlaceholderProps) {
+  return (
+    <div className="h-60 min-w-52 pointer-events-none snap-center px-5">
+      <div className={"rounded-lg z-20 w-full h-full " + props.className}></div>
+    </div>
+  );
 }

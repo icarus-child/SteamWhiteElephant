@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GetPlayer } from "./db/players";
+import { baseurl } from "./constants";
 
 export async function middleware(request: NextRequest) {
   console.log(request.url);
@@ -10,7 +11,7 @@ export async function middleware(request: NextRequest) {
   if (cookie == undefined || (await GetPlayer(cookie.value)) == undefined) {
     return;
   }
-  return NextResponse.redirect("http:localhost:3000/");
+  return NextResponse.redirect(baseurl);
 }
 
 export const config = {

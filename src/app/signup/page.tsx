@@ -33,12 +33,12 @@ export default function Signup() {
   const fetchGameName = async (gameIdRaw: string) => {
     const gameId = await ParseGameId(gameIdRaw);
     if (gameId == null) {
-      setGameName("Counter-Strike 2");
+      setGameName("Invalid Input");
       return;
     }
     const gameName = await GetSteamGameName(gameId);
     if (gameName == null || gameName == "") {
-      setGameName("Counter-Strike 2");
+      setGameName("Game not found");
       return;
     }
     setGameName(gameName);
@@ -48,6 +48,10 @@ export default function Signup() {
     handleChange(event);
     clearTimeout(timerId);
     timerId = setTimeout(() => {
+      if (event.target.value == "") {
+        setGameName("Counter-Strike 2");
+        return;
+      }
       fetchGameName(event.target.value);
     }, 500) as unknown as number;
   };
