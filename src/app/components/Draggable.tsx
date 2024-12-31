@@ -1,7 +1,13 @@
 "use client";
 
-import { createRef, RefObject, useEffect, useRef, useState } from "react";
-import { isFirefox } from "react-device-detect";
+import React, {
+  RefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { isFirefox, isSafari } from "react-device-detect";
 
 const updateCursor = (ele: HTMLElement) => {
   ele.style.cursor = "grabbing";
@@ -11,6 +17,10 @@ const updateCursor = (ele: HTMLElement) => {
 const resetCursor = (ele: HTMLElement) => {
   ele.style.cursor = "grab";
   ele.style.removeProperty("user-select");
+};
+
+type SnapControlledProps = {
+  snap: boolean | undefined;
 };
 
 function Buffer({ snap }: SnapControlledProps) {
@@ -41,17 +51,6 @@ function Buffer({ snap }: SnapControlledProps) {
   );
 }
 
-type SnapControlledProps = {
-  snap: boolean | undefined;
-};
-
-function MiddleLine({ snap }: SnapControlledProps) {
-  if (snap) {
-    return <div className="middleline z-10 w-2 h-20 bg-sky-50"></div>;
-  }
-  return null;
-}
-
 type MousePos = {
   left: number;
   top: number;
@@ -62,6 +61,7 @@ type MousePos = {
 export type DraggableProps = {
   className: string;
   snap?: boolean;
+  focus?: number;
   children: React.ReactNode;
 };
 
@@ -72,13 +72,14 @@ export default function Draggable(props: DraggableProps) {
     x: 0,
     y: 0,
   });
-  const ref: RefObject<HTMLDivElement | null> = createRef();
+  const ref: RefObject<HTMLDivElement | null> = useRef(null);
   const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
   const [isSmoothScroll, setIsSmoothScroll] = useState<string>("");
+  const [refWidth, setRefWidth] = useState<number>(0);
   const scrollTargetPoint = useRef(0);
   const scrollTargetIndex = useRef(0);
 
-  function wheelEventHandlerSnap(e: WheelEvent) {
+  const wheelEventHandlerSnap = useCallback((e: WheelEvent) => {
     const ele = e.target as HTMLDivElement;
     if (e.deltaY > 0) {
       scrollTargetIndex.current = Math.min(
@@ -103,9 +104,9 @@ export default function Draggable(props: DraggableProps) {
         behavior: "smooth",
       });
     }
-  }
+  }, []);
 
-  function wheelEventHandlerNoSnap(e: WheelEvent) {
+  const wheelEventHandlerNoSnap = useCallback((e: WheelEvent) => {
     const ele = e.target as HTMLDivElement;
     scrollTargetPoint.current = Math.max(
       Math.min(
@@ -115,17 +116,7 @@ export default function Draggable(props: DraggableProps) {
       0,
     );
     ele.scrollLeft = scrollTargetPoint.current;
-  }
-
-  useEffect(() => {
-    if (props.snap) {
-      ref.current?.removeEventListener("wheel", wheelEventHandlerSnap);
-      ref.current?.addEventListener("wheel", wheelEventHandlerSnap);
-    } else {
-      ref.current?.removeEventListener("wheel", wheelEventHandlerNoSnap);
-      ref.current?.addEventListener("wheel", wheelEventHandlerNoSnap);
-    }
-  }, [ref.current?.children]);
+  }, []);
 
   function getClosestElementCenter(
     ref: HTMLDivElement,
@@ -154,6 +145,7 @@ export default function Draggable(props: DraggableProps) {
         } else if (i == ref.children.length - 1) {
           leftStack -= el.clientWidth;
           i--;
+          count--;
           el = ref.children.item(i);
           if (el == null) break;
         }
@@ -239,15 +231,54 @@ export default function Draggable(props: DraggableProps) {
     }
   }
 
+  function MiddleLine({ snap }: SnapControlledProps) {
+    if (snap) {
+      if (!ref.current) return;
+      return (
+        <div
+          className="middleline bg-[#bfdbfe30] border-blue-200 border-y-8 h-16 shrink-0 absolute top-0 z-10 pointer-events-none"
+          style={{ width: refWidth }}
+        ></div>
+      );
+    }
+    return null;
+  }
+
+  const resizeHandler = useCallback(() => {
+    if (!ref.current) return;
+    let width = 0;
+    for (let i = 0; i < ref.current.children.length; i++) {
+      let el = ref.current.children.item(i);
+      if (el == null || el.classList.contains("middleline")) continue;
+      width += el.scrollWidth;
+    }
+    setRefWidth(width);
+  }, []);
+
+  useEffect(() => {
+    if (props.snap) {
+      ref.current?.removeEventListener("wheel", wheelEventHandlerSnap);
+      ref.current?.addEventListener("wheel", wheelEventHandlerSnap);
+      window.removeEventListener("resize", resizeHandler);
+      window.addEventListener("resize", resizeHandler);
+      resizeHandler();
+    } else {
+      ref.current?.removeEventListener("wheel", wheelEventHandlerNoSnap);
+      ref.current?.addEventListener("wheel", wheelEventHandlerNoSnap);
+    }
+  }, [ref.current?.children]);
+
   useEffect(() => {
     if (isFirefox) setIsSmoothScroll("scroll-smooth");
+    if (isSafari) setIsSmoothScroll("scroll-smooth snap-x");
   }, [isFirefox]);
 
   useEffect(() => {
     if (ref.current == null || !props.snap) {
       return;
     }
-    const temp = getChildCenterByIndex(ref.current, 0) ?? 0;
+    const temp = getChildCenterByIndex(ref.current, props.focus ?? 0) ?? 0;
+    scrollTargetIndex.current = props.focus ?? 0;
     ref.current.scrollLeft = temp;
   }, [ref.current?.children]);
 

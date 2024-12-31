@@ -25,17 +25,11 @@ body {
 
 .hide-scrollbar {
   -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;
   ::-webkit-scrollbar {
+    /* Firefox */
     display: none;
   }
-}
-
-.middleline {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
 }
 
 :has(> .middleline) {
