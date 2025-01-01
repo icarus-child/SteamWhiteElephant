@@ -1,6 +1,14 @@
 import { signup } from "@/actions/auth";
 import { GetSteamGameName, ParseGameId } from "@/actions/steam";
-import { ChangeEvent, JSX, useActionState, useState } from "react";
+import {
+  ChangeEvent,
+  ChangeEventHandler,
+  JSX,
+  useActionState,
+  useState,
+} from "react";
+import Input from "../components/Input";
+import Button from "../components/Button";
 
 type Inputs = {
   name: string | null;
@@ -19,14 +27,100 @@ function Errors(errors: string[]): JSX.Element[] {
   return rows;
 }
 
+type GameInputProps = {
+  onChange: ChangeEventHandler;
+  gameName: string;
+  required?: boolean;
+};
+
+function GameInput(props: GameInputProps) {
+  return (
+    <>
+      <div className="md:flex md:items-center mb-1">
+        <div className="md:w-1/3">
+          <label
+            className="block font-bold md:text-right mb-1 md:mb-0 pr-4"
+            htmlFor="inline-game-id"
+          >
+            Steam Game URL
+          </label>
+        </div>
+        <div className="md:w-2/3">
+          <Input
+            id="inline-game-id"
+            name="game-id"
+            type="text"
+            onChange={props.onChange}
+            required={props.required}
+            form="signup"
+          />
+        </div>
+      </div>
+      <div className="md:flex md:items-center mb-6">
+        <div className="md:w-1/3"></div>
+        <div className="md:w-2/3">
+          <span id="game-name">{props.gameName}</span>
+        </div>
+      </div>
+    </>
+  );
+}
+
+type NormalInputProps = {
+  children?: React.ReactNode;
+  onChange: ChangeEventHandler;
+  name: string;
+  id: string;
+};
+
+function NormalInput(props: NormalInputProps) {
+  return (
+    <div className="md:flex md:items-center mb-6">
+      <div className="md:w-32">
+        <label
+          className="block font-bold w-fit md:text-right md:ml-auto mb-1 md:mb-0 pr-4"
+          htmlFor={props.id}
+        >
+          {props.children}
+        </label>
+      </div>
+      <div className="md:w-3/5">
+        <Input
+          id={props.id}
+          name={props.name}
+          type="text"
+          onChange={props.onChange}
+          required
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function Form() {
   const [inputs, setInputs] = useState<Inputs>({
     name: null,
     "game-id": null,
   });
-  const [gameName, setGameName] = useState<string>("Counter-Strike 2");
+  const [gameName, setGameName] = useState<string>("Type above");
   let timerId: number | undefined = undefined;
   const [state, action, pending] = useActionState(signup, []);
+
+  type GameListProps = {
+    className: string;
+  };
+
+  function GameList(props: GameListProps) {
+    return (
+      <div {...props}>
+        <GameInput
+          onChange={handleIdChange}
+          gameName={gameName}
+          required={true}
+        />
+      </div>
+    );
+  }
 
   const fetchGameName = async (gameIdRaw: string) => {
     const gameId = await ParseGameId(gameIdRaw);
@@ -47,7 +141,7 @@ export default function Form() {
     clearTimeout(timerId);
     timerId = setTimeout(() => {
       if (event.target.value == "") {
-        setGameName("Counter-Strike 2");
+        setGameName("Game not found");
         return;
       }
       fetchGameName(event.target.value);
@@ -62,87 +156,38 @@ export default function Form() {
 
   return (
     <>
-      <form className="w-full max-w-sm" action={action}>
-        <div className="md:flex md:items-center mb-6">
-          <div className="md:w-1/3">
-            <label
-              className="block font-bold md:text-right mb-1 md:mb-0 pr-4"
-              htmlFor="inline-name"
-            >
-              Player Name
-            </label>
-          </div>
-          <div className="md:w-2/3">
-            <input
-              className="bg-background appearance-none border-2 rounded w-full py-2 px-4 
-              leading-tight focus:outline-none focus:text-primary focus:border-primary"
-              id="inline-name"
-              name="name"
-              type="text"
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
-        <div className="md:flex md:items-center mb-1">
-          <div className="md:w-1/3"></div>
-          <div className="md:w-2/3">
-            <span id="game-name">{gameName}</span>
-          </div>
-        </div>
-        <div className="md:flex md:items-center mb-1">
-          <div className="md:w-1/3">
-            <label
-              className="block font-bold md:text-right mb-1 md:mb-0 pr-4"
-              htmlFor="inline-game-id"
-            >
-              Steam Game ID
-            </label>
-          </div>
-          <div className="md:w-2/3">
-            <input
-              className="bg-background appearance-none border-2 rounded w-full
-              py-2 px-4 leading-tight focus:text-primary focus:outline-none
-              focus:border-primary"
-              id="inline-game-id"
-              name="game-id"
-              type="text"
-              placeholder="730"
-              onChange={handleIdChange}
-              required
-            />
-          </div>
-        </div>
-        <div className="md:flex md:items-center mb-6">
-          <div className="md:w-1/3"></div>
-          <span className="md:w-2/3 flex flex-col">
-            <span>
-              https://store.steampowered.com/app/
-              <b className="text-primary">730</b>/CounterStrike_2/
-            </span>
-          </span>
-        </div>
+      <form id="signup" className="w-full max-w-sm" action={action}>
+        <NormalInput name="name" id="inline-name" onChange={handleChange}>
+          Player Name
+        </NormalInput>
+        <NormalInput name="name" id="inline-name" onChange={handleChange}>
+          Room Id
+        </NormalInput>
+        <GameList className="md:hidden inline-block" />
         <div className="md:flex md:items-center">
           <div className="md:w-1/3"></div>
           <div className="md:w-2/3">
-            <button
-              className="border-text border-2 hover:text-primary hover:border-primary focus:bg-primary focus:text-background focus:border-primary font-bold py-2 px-4 rounded"
-              type="submit"
-            >
-              Join Game
-            </button>
+            <Button>Join Room</Button>
+          </div>
+        </div>
+        <div
+          className={
+            "md:items-center flex-row mt-6 " + (pending ? "md:flex" : "hidden")
+          }
+        >
+          <div className="md:w-1/3"></div>
+          <div className="md:w-2/3 font-bold">Loading...</div>
+        </div>
+        <div className={"flex-row " + (pending ? "hidden" : "md:flex")}>
+          <div className="md:w-1/3"></div>
+          <div id="error" className="md:w-2/3 mt-6 text-red-600 font-medium">
+            {Errors(state)}
           </div>
         </div>
       </form>
-      <div
-        id="indicator"
-        className={"md:items-center mt-6 " + (pending ? "block" : "hidden")}
-      >
-        <div className="md:w-1/3"></div>
-        <div className="md:w-2/3 font-bold">Loading...</div>
-      </div>
-      <div id="error" className="mt-6 text-red-600 font-medium">
-        {Errors(state)}
+      <div className="w-[2px] h-full bg-gray-50 rounded-lg self-center hidden md:inline-block"></div>
+      <div className="hidden md:flex flex-col">
+        <GameList className="hidden md:inline-block" />
       </div>
     </>
   );

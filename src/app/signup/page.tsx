@@ -5,10 +5,8 @@ import Form from "./form";
 export default function Signup() {
   return (
     <div className="grid w-full h-screen place-content-center">
-      <div className="bg-red-700 w-96 md:w-full flex flex-row gap-5">
+      <div className="bg-purple-700 w-96 md:w-fit md:max-w-[768px] md:h-96 md:p-5 p-5 rounded-xl flex flex-col md:flex-row">
         <Form />
-        <div className="w-1 h-5/6 bg-gray-50 rounded-lg self-center"></div>
-        <div>testtest</div>
       </div>
     </div>
   );
