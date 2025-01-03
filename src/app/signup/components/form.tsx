@@ -1,20 +1,10 @@
 import { signup } from "@/actions/auth";
 import { GetSteamGameName, ParseGameId } from "@/actions/steam";
-import {
-  ChangeEvent,
-  ChangeEventHandler,
-  JSX,
-  useActionState,
-  useState,
-} from "react";
-import Input from "../components/Input";
-import Button from "../components/Button";
+import { ChangeEvent, JSX, useActionState, useState } from "react";
+import Button from "@/app/components/Button";
 import { CheckSession } from "@/db/session";
-
-type Inputs = {
-  name: string | null;
-  "game-id": string | null;
-};
+import GameList from "./gameInput";
+import NormalInput from "./normalInput";
 
 function Errors(errors: string[]): JSX.Element[] {
   const rows = [];
@@ -28,106 +18,10 @@ function Errors(errors: string[]): JSX.Element[] {
   return rows;
 }
 
-type GameInputProps = {
-  id: number;
-  onChange: ChangeEventHandler;
-  gameName: string;
-  required?: boolean;
+type Inputs = {
+  name: string | null;
+  "game-id": string | null;
 };
-
-function GameInput(props: GameInputProps) {
-  return (
-    <>
-      <div className="md:flex md:items-center mb-1">
-        <div className="md:w-1/3">
-          <label
-            className="block font-bold md:text-right mb-1 md:mb-0 pr-4"
-            htmlFor={"game-" + props.id}
-          >
-            Steam Game URL
-          </label>
-        </div>
-        <div className="md:w-2/3">
-          <Input
-            id={"game-" + props.id}
-            name={"game-" + props.id}
-            type="text"
-            onChange={props.onChange}
-            required={props.required}
-            form="signup"
-          />
-        </div>
-      </div>
-      <div className="md:flex md:items-center mb-6">
-        <div className="md:w-1/3"></div>
-        <div className="md:w-2/3">
-          <span id="game-name">{props.gameName}</span>
-        </div>
-      </div>
-    </>
-  );
-}
-
-type NormalInputProps = {
-  children?: React.ReactNode;
-  onChange: ChangeEventHandler;
-  name: string;
-  id: string;
-};
-
-function NormalInput(props: NormalInputProps) {
-  return (
-    <div className="md:flex md:items-center mb-6">
-      <div className="md:w-32">
-        <label
-          className="block font-bold w-fit md:text-right md:ml-auto mb-1 md:mb-0 pr-4"
-          htmlFor={props.id}
-        >
-          {props.children}
-        </label>
-      </div>
-      <div className="md:w-3/5">
-        <Input
-          id={props.id}
-          name={props.name}
-          type="text"
-          onChange={props.onChange}
-          required
-        />
-      </div>
-    </div>
-  );
-}
-
-type GameListProps = {
-  className: string;
-  onChange: ChangeEventHandler;
-  gameName: string;
-};
-
-const GameInputs = (props: {
-  onChange: ChangeEventHandler;
-  gameName: string;
-}) => {
-  for (let i = 0; i < 1; i++)
-    return (
-      <GameInput
-        id={i}
-        onChange={props.onChange}
-        gameName={props.gameName}
-        required={true}
-      />
-    );
-};
-
-function GameList(props: GameListProps) {
-  const { onChange, gameName, ...rest } = props;
-  return (
-    <div {...rest}>
-      <GameInputs onChange={onChange} gameName={gameName} />
-    </div>
-  );
-}
 
 export default function Form() {
   const [inputs, setInputs] = useState<Inputs>({
