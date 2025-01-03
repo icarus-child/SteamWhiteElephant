@@ -1,16 +1,22 @@
 import "server-only";
 import { Player } from "@/types/player";
+import { dburl } from "@/constants";
 
-export async function CreatePlayer(id: string, player: Player) {
-  console.log(id);
-  fetch("http://localhost:3333/player/", {
+export async function CreatePlayer(
+  sessionid: string,
+  playerid: string,
+  player: Player,
+) {
+  console.log(playerid);
+  fetch(dburl + "player/", {
     method: "POST",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      id: id,
+      sessionId: sessionid,
+      playerId: playerid,
       name: player.name,
     }),
   });
@@ -22,8 +28,7 @@ type JsonPlayer = {
 };
 
 export async function GetPlayer(id: string): Promise<Player | undefined> {
-  console.log(id);
-  const response = await fetch("http://localhost:3333/player?id=" + id, {
+  const response = await fetch(dburl + "player?id=" + id, {
     method: "GET",
   });
   let json: JsonPlayer;

@@ -65,9 +65,12 @@ export async function signup(
   redirect("/");
 }
 
-function createPlayer(player: Player): { uuid: string; ok: boolean } {
+function createPlayer(
+  sessionId: string,
+  player: Player,
+): { uuid: string; ok: boolean } {
   const id = crypto.randomUUID();
-  CreatePlayer(id, player);
+  CreatePlayer(sessionId, id, player);
   return { uuid: id, ok: true };
 }
 

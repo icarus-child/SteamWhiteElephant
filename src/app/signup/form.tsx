@@ -9,6 +9,7 @@ import {
 } from "react";
 import Input from "../components/Input";
 import Button from "../components/Button";
+import { CheckSession } from "@/db/session";
 
 type Inputs = {
   name: string | null;
@@ -28,6 +29,7 @@ function Errors(errors: string[]): JSX.Element[] {
 }
 
 type GameInputProps = {
+  id: number;
   onChange: ChangeEventHandler;
   gameName: string;
   required?: boolean;
@@ -40,15 +42,15 @@ function GameInput(props: GameInputProps) {
         <div className="md:w-1/3">
           <label
             className="block font-bold md:text-right mb-1 md:mb-0 pr-4"
-            htmlFor="inline-game-id"
+            htmlFor={"game-" + props.id}
           >
             Steam Game URL
           </label>
         </div>
         <div className="md:w-2/3">
           <Input
-            id="inline-game-id"
-            name="game-id"
+            id={"game-" + props.id}
+            name={"game-" + props.id}
             type="text"
             onChange={props.onChange}
             required={props.required}
@@ -97,30 +99,45 @@ function NormalInput(props: NormalInputProps) {
   );
 }
 
+type GameListProps = {
+  className: string;
+  onChange: ChangeEventHandler;
+  gameName: string;
+};
+
+const GameInputs = (props: {
+  onChange: ChangeEventHandler;
+  gameName: string;
+}) => {
+  for (let i = 0; i < 1; i++)
+    return (
+      <GameInput
+        id={i}
+        onChange={props.onChange}
+        gameName={props.gameName}
+        required={true}
+      />
+    );
+};
+
+function GameList(props: GameListProps) {
+  const { onChange, gameName, ...rest } = props;
+  return (
+    <div {...rest}>
+      <GameInputs onChange={onChange} gameName={gameName} />
+    </div>
+  );
+}
+
 export default function Form() {
   const [inputs, setInputs] = useState<Inputs>({
     name: null,
     "game-id": null,
   });
   const [gameName, setGameName] = useState<string>("Type above");
+  const [submitButton, setSubmitButton] = useState<string>("Create Room");
   let timerId: number | undefined = undefined;
   const [state, action, pending] = useActionState(signup, []);
-
-  type GameListProps = {
-    className: string;
-  };
-
-  function GameList(props: GameListProps) {
-    return (
-      <div {...props}>
-        <GameInput
-          onChange={handleIdChange}
-          gameName={gameName}
-          required={true}
-        />
-      </div>
-    );
-  }
 
   const fetchGameName = async (gameIdRaw: string) => {
     const gameId = await ParseGameId(gameIdRaw);
@@ -136,7 +153,12 @@ export default function Form() {
     setGameName(gameName);
   };
 
-  const handleIdChange = async (event: ChangeEvent<HTMLInputElement>) => {
+  const checkSessionAvailability = async (roomId: string) => {
+    const exists = await CheckSession(roomId);
+    setSubmitButton(exists ? "Join Room" : "Create Room");
+  };
+
+  const handleGameIdChange = async (event: ChangeEvent<HTMLInputElement>) => {
     handleChange(event);
     clearTimeout(timerId);
     timerId = setTimeout(() => {
@@ -146,6 +168,11 @@ export default function Form() {
       }
       fetchGameName(event.target.value);
     }, 500) as unknown as number;
+  };
+
+  const handleRoomIdChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    handleChange(event);
+    checkSessionAvailability(event.target.value);
   };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -160,14 +187,18 @@ export default function Form() {
         <NormalInput name="name" id="inline-name" onChange={handleChange}>
           Player Name
         </NormalInput>
-        <NormalInput name="name" id="inline-name" onChange={handleChange}>
+        <NormalInput name="room" id="inline-room" onChange={handleRoomIdChange}>
           Room Id
         </NormalInput>
-        <GameList className="md:hidden inline-block" />
+        <GameList
+          className="md:hidden block"
+          onChange={handleGameIdChange}
+          gameName={gameName}
+        />
         <div className="md:flex md:items-center">
           <div className="md:w-1/3"></div>
           <div className="md:w-2/3">
-            <Button>Join Room</Button>
+            <Button>{submitButton}</Button>
           </div>
         </div>
         <div
@@ -185,9 +216,13 @@ export default function Form() {
           </div>
         </div>
       </form>
-      <div className="w-[2px] h-full bg-gray-50 rounded-lg self-center hidden md:inline-block"></div>
+      <div className="w-[2px] h-full bg-gray-50 rounded-lg self-center hidden md:block mr-2"></div>
       <div className="hidden md:flex flex-col">
-        <GameList className="hidden md:inline-block" />
+        <GameList
+          className="hidden md:block"
+          onChange={handleGameIdChange}
+          gameName={gameName}
+        />
       </div>
     </>
   );
