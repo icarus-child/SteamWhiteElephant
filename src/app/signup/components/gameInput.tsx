@@ -5,7 +5,6 @@ type GameInputProps = {
   id: number;
   onChange: ChangeEventHandler;
   gameName: string;
-  required?: boolean;
 };
 
 function GameInput(props: GameInputProps) {
@@ -23,10 +22,9 @@ function GameInput(props: GameInputProps) {
         <div className="md:w-2/3">
           <Input
             id={"game-" + props.id}
-            name={"game-" + props.id}
+            name={props.id.toString()}
             type="text"
             onChange={props.onChange}
-            required={props.required}
             form="signup"
           />
         </div>
@@ -53,12 +51,7 @@ const GameInputs = (props: {
 }) => {
   for (let i = 0; i < 1; i++)
     return (
-      <GameInput
-        id={i}
-        onChange={props.onChange}
-        gameName={props.gameName}
-        required={true}
-      />
+      <GameInput id={i} onChange={props.onChange} gameName={props.gameName} />
     );
 };
 

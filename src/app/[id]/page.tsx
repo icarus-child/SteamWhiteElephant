@@ -1,6 +1,6 @@
-import Draggable from "./components/Draggable";
-import Present from "./components/Present";
-import WrappedPresent from "./components/WrappedPresent";
+import Draggable from "@/app/components/Draggable";
+import Present from "@/app/components/Present";
+import WrappedPresent from "@/app/components/WrappedPresent";
 
 export default function Home() {
   return (

@@ -257,14 +257,18 @@ export default function Draggable(props: DraggableProps) {
 
   useEffect(() => {
     if (props.snap) {
-      ref.current?.removeEventListener("wheel", wheelEventHandlerSnap);
       ref.current?.addEventListener("wheel", wheelEventHandlerSnap);
-      window.removeEventListener("resize", resizeHandler);
       window.addEventListener("resize", resizeHandler);
       resizeHandler();
+      return () => {
+        ref.current?.removeEventListener("wheel", wheelEventHandlerSnap);
+        window.removeEventListener("resize", resizeHandler);
+      };
     } else {
-      ref.current?.removeEventListener("wheel", wheelEventHandlerNoSnap);
       ref.current?.addEventListener("wheel", wheelEventHandlerNoSnap);
+      return () => {
+        ref.current?.removeEventListener("wheel", wheelEventHandlerNoSnap);
+      };
     }
   }, [ref.current?.children]);
 

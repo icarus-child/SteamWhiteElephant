@@ -1,6 +1,6 @@
 import { signup } from "@/actions/auth";
 import { GetSteamGameName, ParseGameId } from "@/actions/steam";
-import { ChangeEvent, JSX, useActionState, useState } from "react";
+import { ChangeEvent, FormEvent, JSX, useActionState, useState } from "react";
 import Button from "@/app/components/Button";
 import { CheckSession } from "@/db/session";
 import GameList from "./gameInput";
@@ -18,20 +18,25 @@ function Errors(errors: string[]): JSX.Element[] {
   return rows;
 }
 
-type Inputs = {
+export type Inputs = {
   name: string | null;
-  "game-id": string | null;
+  room: string | null;
+  games: string[];
 };
 
 export default function Form() {
   const [inputs, setInputs] = useState<Inputs>({
     name: null,
-    "game-id": null,
+    room: null,
+    games: [],
   });
+  const [pending, setPending] = useState<boolean>(false);
+  const [errors, setErrors] = useState<string[]>([]);
   const [gameName, setGameName] = useState<string>("Type above");
-  const [submitButton, setSubmitButton] = useState<string>("Create Room");
+  const [submitButton, setSubmitButton] = useState<string>(
+    "Create or Join Room",
+  );
   let timerId: number | undefined = undefined;
-  const [state, action, pending] = useActionState(signup, []);
 
   const fetchGameName = async (gameIdRaw: string) => {
     const gameId = await ParseGameId(gameIdRaw);
@@ -52,8 +57,19 @@ export default function Form() {
     setSubmitButton(exists ? "Join Room" : "Create Room");
   };
 
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setPending(true);
+    setErrors(await signup(inputs));
+    setPending(false);
+  };
+
   const handleGameIdChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    handleChange(event);
+    const inputid = Number(event.target.name);
+    const value = event.target.value;
+    const { games, ...rest } = inputs;
+    games[inputid] = value;
+    setInputs({ ...rest, games });
     clearTimeout(timerId);
     timerId = setTimeout(() => {
       if (event.target.value == "") {
@@ -72,12 +88,13 @@ export default function Form() {
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const name = event.target.name;
     const value = event.target.value;
+    console.log(name, value);
     setInputs({ ...inputs, [name]: value });
   };
 
   return (
     <>
-      <form id="signup" className="w-full max-w-sm" action={action}>
+      <form id="signup" className="w-full max-w-sm" onSubmit={handleSubmit}>
         <NormalInput name="name" id="inline-name" onChange={handleChange}>
           Player Name
         </NormalInput>
@@ -106,7 +123,7 @@ export default function Form() {
         <div className={"flex-row " + (pending ? "hidden" : "md:flex")}>
           <div className="md:w-1/3"></div>
           <div id="error" className="md:w-2/3 mt-6 text-red-600 font-medium">
-            {Errors(state)}
+            {Errors(errors)}
           </div>
         </div>
       </form>

@@ -25,7 +25,6 @@ export default function NormalInput(props: NormalInputProps) {
           name={props.name}
           type="text"
           onChange={props.onChange}
-          required
         />
       </div>
     </div>

@@ -6,9 +6,8 @@ export async function CreatePlayer(
   sessionid: string,
   playerid: string,
   player: Player,
-) {
-  console.log(playerid);
-  fetch(dburl + "player/", {
+): Promise<boolean> {
+  const res = await fetch(dburl + "player/", {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -20,6 +19,10 @@ export async function CreatePlayer(
       name: player.name,
     }),
   });
+  if (res.status == 200) {
+    return true;
+  }
+  return false;
 }
 
 type JsonPlayer = {

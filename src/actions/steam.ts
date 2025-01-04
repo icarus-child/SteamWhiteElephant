@@ -5,6 +5,7 @@ import * as cheerio from "cheerio";
 export type SteamInfo = {
   name: string;
   tags: string[];
+  gameId: number;
   ok: boolean;
 };
 
@@ -40,6 +41,7 @@ export async function GetSteamGameInfo(gameId: number): Promise<SteamInfo> {
     return Promise.resolve({
       name: "",
       tags: [],
+      gameId: NaN,
       ok: false,
     });
   }
@@ -55,6 +57,7 @@ export async function GetSteamGameInfo(gameId: number): Promise<SteamInfo> {
   return Promise.resolve({
     name: name,
     tags: tags,
+    gameId: gameId,
     ok: true,
   });
 }
