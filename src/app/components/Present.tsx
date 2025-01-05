@@ -1,6 +1,12 @@
 "use client";
 
-import { CSSProperties, useEffect, useRef, useState } from "react";
+import {
+  CSSProperties,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 type SelectedPlayerProps = {
   selected: boolean;
@@ -33,6 +39,7 @@ export type PresentPlaceholderProps = {
   name: string;
   className?: string;
   selected?: boolean;
+  resizeHandler?: Function;
 };
 
 export default function PresentPlaceholder(props: PresentPlaceholderProps) {
@@ -46,11 +53,13 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
       paddingLeft: ref.current.clientHeight * 0.1,
       paddingRight: ref.current.clientHeight * 0.1,
     });
+    console.log("calling resize " + ref.current.clientWidth);
+    if (props.resizeHandler) props.resizeHandler();
   }
 
-  useEffect(() => {
-    window.addEventListener("resize", updateSize);
+  useLayoutEffect(() => {
     updateSize();
+    window.addEventListener("resize", updateSize);
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 

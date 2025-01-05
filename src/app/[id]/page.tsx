@@ -6,8 +6,8 @@ import WrappedPresent from "@/app/components/WrappedPresent";
 import { Player } from "@/types/player";
 import { Present as PresentType } from "@/types/present";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { io } from "socket.io-client";
+import { useEffect, useState } from "react";
+import { socket } from "./socket";
 
 export default function Home() {
   const [_1, setIsConnected] = useState<boolean>(false);
@@ -17,14 +17,6 @@ export default function Home() {
 
   const roomId = useParams().id as string;
 
-  const socket = useMemo(() => {
-    return io({
-      extraHeaders: {
-        roomid: roomId,
-      },
-    });
-  }, []);
-
   useEffect(() => {
     function onConnect() {
       setIsConnected(true);
@@ -33,6 +25,8 @@ export default function Home() {
       socket.io.engine.on("upgrade", (transport) => {
         setTransport(transport.name);
       });
+
+      socket.emit("room", roomId);
     }
 
     function onDisconnect() {
@@ -41,6 +35,7 @@ export default function Home() {
     }
 
     function onUpdatePlayers(eventPlayers: Player[]) {
+      if (!eventPlayers) return;
       setPlayers(eventPlayers);
       for (const p of eventPlayers) {
         console.log(p.name);
@@ -48,6 +43,7 @@ export default function Home() {
     }
 
     function onUpdatePresents(eventPresents: PresentType[]) {
+      if (!eventPresents) return;
       setPresents(eventPresents);
       for (const p of eventPresents) {
         for (const i of p.items) {
@@ -69,11 +65,11 @@ export default function Home() {
     };
   }, []);
 
-  const playerElements = players.map((player, i) => {
+  const playerElements = players?.map((player, i) => {
     return <Present name={player.name} key={i} className="bg-[#B8B799]" />;
   });
 
-  const presentElements = players.map((player, i) => {
+  const presentElements = presents?.map((present, i) => {
     return <WrappedPresent key={i} className="bg-[#B8B799]" />;
   });
 

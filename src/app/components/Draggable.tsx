@@ -1,9 +1,12 @@
 "use client";
 
 import React, {
+  ReactElement,
   RefObject,
   useCallback,
   useEffect,
+  useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -234,6 +237,7 @@ export default function Draggable(props: DraggableProps) {
   function MiddleLine({ snap }: SnapControlledProps) {
     if (snap) {
       if (!ref.current) return;
+      console.log("repaint " + refWidth);
       return (
         <div
           className="middleline bg-[#bfdbfe30] border-blue-200 border-y-8 h-16 shrink-0 absolute top-0 z-10 pointer-events-none"
@@ -244,24 +248,29 @@ export default function Draggable(props: DraggableProps) {
     return null;
   }
 
-  const resizeHandler = useCallback(() => {
-    if (!ref.current) return;
+  const calculateWidth = useCallback((_: number): number => {
+    if (!ref.current) return 0;
     let width = 0;
     for (let i = 0; i < ref.current.children.length; i++) {
       let el = ref.current.children.item(i);
+      console.log(el?.className + " : " + el?.scrollWidth);
       if (el == null || el.classList.contains("middleline")) continue;
       width += el.scrollWidth;
     }
-    setRefWidth(width);
+    return width;
   }, []);
+
+  const resizeHandler = (eleWidth: number) => {
+    if (!ref.current) return;
+    const width = calculateWidth(eleWidth);
+    setRefWidth(width);
+  };
 
   useEffect(() => {
     if (props.snap) {
       ref.current?.addEventListener("wheel", wheelEventHandlerSnap);
-      window.addEventListener("resize", resizeHandler);
       return () => {
         ref.current?.removeEventListener("wheel", wheelEventHandlerSnap);
-        window.removeEventListener("resize", resizeHandler);
       };
     } else {
       ref.current?.addEventListener("wheel", wheelEventHandlerNoSnap);
@@ -270,11 +279,6 @@ export default function Draggable(props: DraggableProps) {
       };
     }
   }, []);
-
-  useEffect(() => {
-    console.log("child count changed");
-    resizeHandler();
-  }, [React.Children.count(props.children)]);
 
   useEffect(() => {
     if (isFirefox) setIsSmoothScroll("scroll-smooth");
@@ -290,6 +294,17 @@ export default function Draggable(props: DraggableProps) {
     ref.current.scrollLeft = temp;
   }, [ref.current?.children]);
 
+  const renderChildren = () => {
+    return React.Children.map(props.children, (child) => {
+      return React.cloneElement(
+        child as ReactElement<{ resizeHandler: Function }>,
+        {
+          resizeHandler: resizeHandler,
+        },
+      );
+    });
+  };
+
   return (
     <div
       ref={ref}
@@ -300,7 +315,7 @@ export default function Draggable(props: DraggableProps) {
     >
       <Buffer snap={props.snap} />
       <MiddleLine snap={props.snap} />
-      {props.children}
+      {renderChildren()}
       <Buffer snap={props.snap} />
     </div>
   );

@@ -14,12 +14,14 @@ app.prepare().then(() => {
 
   const io = new Server(httpServer);
 
-  io.on("connection", async (socket) => {
-    const roomId: string = socket.handshake.headers["roomid"] as string;
-    socket.join(roomId);
-    console.log(roomId);
-    io.to(roomId).emit("players", await GetRoomPlayers(roomId));
-    io.to(roomId).emit("presents", await GetRoomPresents(roomId));
+  io.on("connection", (socket) => {
+    socket.on("room", async (roomIdRaw) => {
+      if (!roomIdRaw) return;
+      const roomId: string = roomIdRaw as string;
+      socket.join(roomId);
+      io.to(roomId).emit("players", await GetRoomPlayers(roomId));
+      io.to(roomId).emit("presents", await GetRoomPresents(roomId));
+    });
   });
 
   httpServer
