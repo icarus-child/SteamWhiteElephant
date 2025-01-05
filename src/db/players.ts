@@ -1,9 +1,10 @@
-import "server-only";
-import { Player } from "@/types/player";
+"use server";
+
+import { Player, RoomPlayer } from "@/types/player";
 import { dburl } from "@/constants";
 
 export async function CreatePlayer(
-  sessionid: string,
+  roomid: string,
   playerid: string,
   player: Player,
 ): Promise<boolean> {
@@ -14,7 +15,7 @@ export async function CreatePlayer(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      sessionId: sessionid,
+      roomId: roomid,
       playerId: playerid,
       name: player.name,
     }),
@@ -25,12 +26,11 @@ export async function CreatePlayer(
   return false;
 }
 
-type JsonPlayer = {
-  name: string;
+type JsonPlayer = RoomPlayer & {
   error: string;
 };
 
-export async function GetPlayer(id: string): Promise<Player | undefined> {
+export async function GetPlayer(id: string): Promise<RoomPlayer | undefined> {
   const response = await fetch(dburl + "player?id=" + id, {
     method: "GET",
   });
@@ -45,5 +45,27 @@ export async function GetPlayer(id: string): Promise<Player | undefined> {
   }
   return {
     name: json.name,
+    room: json.room,
   };
+}
+
+type JsonPlayers = {
+  error: string;
+  players: RoomPlayer[];
+};
+
+export async function GetRoomPlayers(id: string): Promise<Player[]> {
+  const response = await fetch(dburl + "room-players?id=" + id, {
+    method: "GET",
+  });
+  let json: JsonPlayers;
+  try {
+    json = await response.json();
+  } catch (error) {
+    return [];
+  }
+  if (json.error != null) {
+    return [];
+  }
+  return json.players;
 }

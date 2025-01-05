@@ -21,3 +21,24 @@ export async function CreatePresent(
   }
   return false;
 }
+
+type JsonPresents = {
+  error: string;
+  presents: Present[];
+};
+
+export async function GetRoomPresents(id: string): Promise<Present[]> {
+  const response = await fetch(dburl + "room-presents?id=" + id, {
+    method: "GET",
+  });
+  let json: JsonPresents;
+  try {
+    json = await response.json();
+  } catch (error) {
+    return [];
+  }
+  if (json.error != null) {
+    return [];
+  }
+  return json.presents;
+}

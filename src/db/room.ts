@@ -3,16 +3,16 @@
 import "server-only";
 import { dburl } from "@/constants";
 
-type JsonSession = {
+type JsonRoom = {
   exists: boolean;
   error: string;
 };
 
-export async function CheckSession(id: string): Promise<boolean | undefined> {
-  const response = await fetch(dburl + "session-exists?id=" + id, {
+export async function CheckRoom(id: string): Promise<boolean | undefined> {
+  const response = await fetch(dburl + "room-exists?id=" + id, {
     method: "GET",
   });
-  let json: JsonSession;
+  let json: JsonRoom;
   try {
     json = await response.json();
   } catch (error) {

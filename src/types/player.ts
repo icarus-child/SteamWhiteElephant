@@ -2,6 +2,6 @@ export type Player = {
   name: string;
 };
 
-export type SessionPlayer = Player & {
+export type RoomPlayer = Player & {
   room: string;
 };

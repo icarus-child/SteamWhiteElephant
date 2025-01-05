@@ -1,7 +1,7 @@
 "use server";
 
 import "server-only";
-import { Player, SessionPlayer } from "@/types/player";
+import { Player, RoomPlayer } from "@/types/player";
 import { Present } from "@/types/present";
 import { GetSteamGameInfo, ParseGameId, SteamInfo } from "./steam";
 import { cookies } from "next/headers";
@@ -58,7 +58,7 @@ export async function signup(inputs: Inputs): Promise<string[]> {
     return errors;
   }
 
-  const player: SessionPlayer = {
+  const player: RoomPlayer = {
     name: (nameRaw as FormDataEntryValue).toString(),
     room: (roomRaw as FormDataEntryValue).toString(),
   };
@@ -79,10 +79,10 @@ export async function signup(inputs: Inputs): Promise<string[]> {
     return errors;
   }
   createSessionCookie(userId);
-  redirect("/");
+  redirect("/" + player.room);
 }
 
-async function createPlayer(player: SessionPlayer): Promise<{
+async function createPlayer(player: RoomPlayer): Promise<{
   uuid: string;
   ok: boolean;
 }> {

@@ -1,8 +1,8 @@
 import { signup } from "@/actions/auth";
 import { GetSteamGameName, ParseGameId } from "@/actions/steam";
-import { ChangeEvent, FormEvent, JSX, useActionState, useState } from "react";
+import { ChangeEvent, FormEvent, JSX, useState } from "react";
 import Button from "@/app/components/Button";
-import { CheckSession } from "@/db/session";
+import { CheckRoom } from "@/db/room";
 import GameList from "./gameInput";
 import NormalInput from "./normalInput";
 
@@ -52,8 +52,8 @@ export default function Form() {
     setGameName(gameName);
   };
 
-  const checkSessionAvailability = async (roomId: string) => {
-    const exists = await CheckSession(roomId);
+  const checkRoomAvailability = async (roomId: string) => {
+    const exists = await CheckRoom(roomId);
     setSubmitButton(exists ? "Join Room" : "Create Room");
   };
 
@@ -82,13 +82,12 @@ export default function Form() {
 
   const handleRoomIdChange = async (event: ChangeEvent<HTMLInputElement>) => {
     handleChange(event);
-    checkSessionAvailability(event.target.value);
+    checkRoomAvailability(event.target.value);
   };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const name = event.target.name;
     const value = event.target.value;
-    console.log(name, value);
     setInputs({ ...inputs, [name]: value });
   };
 
