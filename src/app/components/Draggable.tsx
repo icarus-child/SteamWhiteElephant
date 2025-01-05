@@ -259,7 +259,6 @@ export default function Draggable(props: DraggableProps) {
     if (props.snap) {
       ref.current?.addEventListener("wheel", wheelEventHandlerSnap);
       window.addEventListener("resize", resizeHandler);
-      resizeHandler();
       return () => {
         ref.current?.removeEventListener("wheel", wheelEventHandlerSnap);
         window.removeEventListener("resize", resizeHandler);
@@ -270,7 +269,12 @@ export default function Draggable(props: DraggableProps) {
         ref.current?.removeEventListener("wheel", wheelEventHandlerNoSnap);
       };
     }
-  }, [ref.current?.children]);
+  }, []);
+
+  useEffect(() => {
+    console.log("child count changed");
+    resizeHandler();
+  }, [React.Children.count(props.children)]);
 
   useEffect(() => {
     if (isFirefox) setIsSmoothScroll("scroll-smooth");

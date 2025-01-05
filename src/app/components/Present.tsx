@@ -30,7 +30,8 @@ function SelectedPlayer(props: SelectedPlayerProps) {
 }
 
 export type PresentPlaceholderProps = {
-  className: string;
+  name: string;
+  className?: string;
   selected?: boolean;
 };
 
@@ -67,9 +68,15 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
           (props.selected ? "text-yellow-200" : "text-blue-200")
         }
       >
-        TestName
+        {props.name}
       </div>
-      <div className={"rounded-lg size-full" + " " + props.className}></div>
+      <div
+        className={
+          "rounded-lg size-full" +
+          " " +
+          (props.className ? props.className : "")
+        }
+      ></div>
     </div>
   );
 }
