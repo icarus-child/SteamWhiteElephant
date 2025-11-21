@@ -21,12 +21,13 @@ export default function Home() {
     function onConnect() {
       setIsConnected(true);
       setTransport(socket.io.engine.transport.name);
+      console.log("roomid: " + roomId);
+      socket.emit("room", roomId);
+      console.time("request players");
 
       socket.io.engine.on("upgrade", (transport) => {
         setTransport(transport.name);
       });
-
-      socket.emit("room", roomId);
     }
 
     function onDisconnect() {
@@ -36,26 +37,23 @@ export default function Home() {
 
     function onUpdatePlayers(eventPlayers: Player[]) {
       if (!eventPlayers) return;
+      console.timeEnd("request players");
+      console.time("parse players");
       setPlayers(eventPlayers);
-      for (const p of eventPlayers) {
-        console.log(p.name);
-      }
+      console.timeEnd("parse players");
     }
 
     function onUpdatePresents(eventPresents: PresentType[]) {
       if (!eventPresents) return;
       setPresents(eventPresents);
-      for (const p of eventPresents) {
-        for (const i of p.items) {
-          console.log(i.name);
-        }
-      }
     }
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("players", onUpdatePlayers);
     socket.on("presents", onUpdatePresents);
+
+    socket.connect();
 
     return () => {
       socket.off("connect", onConnect);
@@ -75,12 +73,12 @@ export default function Home() {
 
   return (
     <div className="h-screen">
-      <Draggable className="justify-center overflow-x-scroll overflow-hidden flex flex-row items-center hide-scrollbar p-5 cursor-grab h-2/5 bg-red-700">
+      <Draggable className="justify-center overflow-x-scroll overflow-hidden flex flex-row items-center hide-scrollbar p-5 cursor-grab h-2/5">
         {presentElements}
       </Draggable>
       <Draggable
         snap={true}
-        className="overflow-x-scroll overflow-hidden flex flex-row hide-scrollbar cursor-grab h-3/5 bg-red-800"
+        className="overflow-x-scroll overflow-hidden flex flex-row hide-scrollbar cursor-grab h-3/5"
       >
         {playerElements}
       </Draggable>

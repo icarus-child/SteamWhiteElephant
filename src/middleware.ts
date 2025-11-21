@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GetPlayer } from "./db/players";
 import { baseurl } from "@/constants";
+import { GetPlayer } from "./rooms";
 
 export async function middleware(request: NextRequest) {
   console.log(request.url);
@@ -9,11 +9,12 @@ export async function middleware(request: NextRequest) {
   }
   const cookie = request.cookies.get("session");
   if (cookie == undefined) return;
-  const player = await GetPlayer(cookie.value);
+  const [playerId, roomId] = cookie.value.split(":", 2);
+  const player = await GetPlayer(roomId, playerId);
   if (player == undefined) {
     return;
   }
-  return NextResponse.redirect(baseurl + "/" + player.room);
+  return NextResponse.redirect(baseurl + "/" + roomId);
 }
 
 export const config = {

@@ -7,8 +7,8 @@ import { GetSteamGameInfo, ParseGameId, SteamInfo } from "./steam";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Inputs } from "@/app/signup/components/form";
-import { CreatePresent } from "@/db/present";
-import { CreatePlayer } from "@/db/players";
+import { AddPresent } from "@/rooms";
+import { AddPlayer } from "@/rooms";
 
 export async function signup(inputs: Inputs): Promise<string[]> {
   const nameRaw = inputs.name;
@@ -62,7 +62,7 @@ export async function signup(inputs: Inputs): Promise<string[]> {
     name: (nameRaw as FormDataEntryValue).toString(),
     room: (roomRaw as FormDataEntryValue).toString(),
   };
-  const { uuid: userId, ok: okPlayer } = await createPlayer(player);
+  const { uuid: playerId, ok: okPlayer } = await createPlayer(player);
   if (!okPlayer) {
     errors.push("Internal server error while creating player");
     return errors;
@@ -73,12 +73,12 @@ export async function signup(inputs: Inputs): Promise<string[]> {
     items: gameIds as SteamInfo[],
   };
 
-  const okPresent = await createPresent(present, userId);
+  const okPresent = await createPresent(present, player.room, playerId);
   if (!okPresent) {
     errors.push("Internal server error while creating present");
     return errors;
   }
-  createSessionCookie(userId);
+  createSessionCookie(playerId, player.room);
   redirect("/" + player.room);
 }
 
@@ -87,20 +87,21 @@ async function createPlayer(player: RoomPlayer): Promise<{
   ok: boolean;
 }> {
   const id = crypto.randomUUID();
-  const ok = await CreatePlayer(player.room, id, player as Player);
+  const ok = await AddPlayer(player.room, id, player as Player);
   return { uuid: id, ok: ok };
 }
 
 export async function createPresent(
   present: Present,
+  roomId: string,
   playerId: string,
 ): Promise<boolean> {
-  return await CreatePresent(present, playerId);
+  return await AddPresent(roomId, playerId, present);
 }
 
-async function createSessionCookie(userId: string) {
+async function createSessionCookie(playerId: string, roomId: string) {
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  const session = userId;
+  const session = playerId + ":" + roomId;
   const cookieStore = await cookies();
 
   cookieStore.set("session", session, {

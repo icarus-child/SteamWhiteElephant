@@ -1,6 +1,5 @@
 "use server";
 
-import "server-only";
 import { dburl } from "@/constants";
 
 type JsonRoom = {

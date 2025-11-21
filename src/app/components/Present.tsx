@@ -39,7 +39,6 @@ export type PresentPlaceholderProps = {
   name: string;
   className?: string;
   selected?: boolean;
-  resizeHandler?: Function;
 };
 
 export default function PresentPlaceholder(props: PresentPlaceholderProps) {
@@ -53,13 +52,11 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
       paddingLeft: ref.current.clientHeight * 0.1,
       paddingRight: ref.current.clientHeight * 0.1,
     });
-    console.log("calling resize " + ref.current.clientWidth);
-    if (props.resizeHandler) props.resizeHandler();
   }
 
   useLayoutEffect(() => {
-    updateSize();
     window.addEventListener("resize", updateSize);
+    updateSize();
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 

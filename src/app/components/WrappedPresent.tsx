@@ -4,7 +4,6 @@ import { CSSProperties, useEffect, useRef, useState } from "react";
 
 export type PresentPlaceholderProps = {
   className: string;
-  resizeHandler?: Function;
 };
 
 export default function PresentPlaceholder(props: PresentPlaceholderProps) {
@@ -18,7 +17,6 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
       paddingLeft: ref.current.clientHeight * 0.1,
       paddingRight: ref.current.clientHeight * 0.1,
     });
-    //if (props.resizeHandler) props.resizeHandler();
   }
 
   useEffect(() => {
