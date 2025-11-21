@@ -1,6 +1,12 @@
 "use client";
 
-import { CSSProperties, useEffect, useRef, useState } from "react";
+import {
+  CSSProperties,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 type SelectedPlayerProps = {
   selected: boolean;
@@ -48,7 +54,7 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
     });
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     window.addEventListener("resize", updateSize);
     updateSize();
     return () => window.removeEventListener("resize", updateSize);

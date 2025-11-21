@@ -55,9 +55,11 @@ type JsonPlayers = {
 };
 
 export async function GetRoomPlayers(id: string): Promise<Player[]> {
+  console.time("fetch-room-players");
   const response = await fetch(dburl + "room-players?id=" + id, {
     method: "GET",
   });
+  console.timeEnd("fetch-room-players");
   let json: JsonPlayers;
   try {
     json = await response.json();

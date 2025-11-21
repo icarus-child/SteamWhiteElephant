@@ -1,3 +1,5 @@
+"use server";
+
 import { dburl } from "@/constants";
 import { Present } from "@/types/present";
 
@@ -35,9 +37,11 @@ export async function GetRoomPresents(id: string): Promise<Present[]> {
   try {
     json = await response.json();
   } catch (error) {
+    console.error(error);
     return [];
   }
   if (json.error != null) {
+    console.error(json.error);
     return [];
   }
   return json.presents;

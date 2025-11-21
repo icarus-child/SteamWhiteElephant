@@ -4,6 +4,7 @@ import React, {
   RefObject,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -273,7 +274,7 @@ export default function Draggable(props: DraggableProps) {
 
   useEffect(() => {
     console.log("child count changed");
-    resizeHandler();
+    setTimeout(resizeHandler, 100);
   }, [React.Children.count(props.children)]);
 
   useEffect(() => {
@@ -281,14 +282,16 @@ export default function Draggable(props: DraggableProps) {
     if (isSafari) setIsSmoothScroll("scroll-smooth snap-x");
   }, [isFirefox]);
 
-  useEffect(() => {
-    if (ref.current == null || !props.snap) {
-      return;
-    }
-    const temp = getChildCenterByIndex(ref.current, props.focus ?? 0) ?? 0;
-    scrollTargetIndex.current = props.focus ?? 0;
-    ref.current.scrollLeft = temp;
-  }, [ref.current?.children]);
+  useLayoutEffect(() => {
+    setTimeout(() => {
+      if (ref.current == null || !props.snap) {
+        return;
+      }
+      const temp = getChildCenterByIndex(ref.current, props.focus ?? 0) ?? 0;
+      scrollTargetIndex.current = props.focus ?? 0;
+      ref.current.scrollLeft = temp;
+    }, 100);
+  }, [React.Children.count(props.children)]);
 
   return (
     <div
