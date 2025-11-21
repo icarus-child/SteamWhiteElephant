@@ -98,6 +98,8 @@ export async function createPresent(
   return await CreatePresent(present, playerId);
 }
 
+// ERROR: Cookies can only be modified in a Server Action or Route Handler. Read more:
+// https://nextjs.org/docs/app/api-reference/functions/cookies#options
 async function createSessionCookie(userId: string) {
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   const session = userId;

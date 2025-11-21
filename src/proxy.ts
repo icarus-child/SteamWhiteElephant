@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { GetPlayer } from "./db/players";
 import { baseurl } from "@/constants";
 
-export async function middleware(request: NextRequest) {
+// TODO: next.js suggests not using proxy (formerly called middleware) unless as a last resort
+export async function proxy(request: NextRequest) {
   console.log(request.url);
   if (!request.cookies.has("session")) {
     return;
