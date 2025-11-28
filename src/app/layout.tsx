@@ -26,7 +26,8 @@ export default function RootLayout({
    <html lang="en" className="bg-background text-text">
       <head>
         <meta charSet="UTF-8"/>
-        <title>Steam Santa Swap</title>
+        <meta name="description" content=metadata.description/>
+        <title>metadata.title</title>
       </head>
       <body
         //className={`${geistSans.variable} ${geistMono.variable} antialiased`}

@@ -7,8 +7,8 @@ import { GetSteamGameInfo, ParseGameId, SteamInfo } from "./steam";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Inputs } from "@/app/signup/components/form";
-import { AddPresent } from "@/rooms";
-import { AddPlayer } from "@/rooms";
+import { CreatePlayer } from "@/db/players";
+import { CreatePresent } from "@/db/present";
 
 export async function signup(inputs: Inputs): Promise<string[]> {
   const nameRaw = inputs.name;
@@ -73,12 +73,12 @@ export async function signup(inputs: Inputs): Promise<string[]> {
     items: gameIds as SteamInfo[],
   };
 
-  const okPresent = await createPresent(present, player.room, playerId);
+  const okPresent = await createPresent(present, playerId);
   if (!okPresent) {
     errors.push("Internal server error while creating present");
     return errors;
   }
-  createSessionCookie(playerId, player.room);
+  createSessionCookie(playerId);
   redirect("/" + player.room);
 }
 
@@ -87,23 +87,22 @@ async function createPlayer(player: RoomPlayer): Promise<{
   ok: boolean;
 }> {
   const id = crypto.randomUUID();
-  const ok = await AddPlayer(player.room, id, player as Player);
+  const ok = await CreatePlayer(player.room, id, player as Player);
   return { uuid: id, ok: ok };
 }
 
 export async function createPresent(
   present: Present,
-  roomId: string,
   playerId: string,
 ): Promise<boolean> {
-  return await AddPresent(roomId, playerId, present);
+  return await CreatePresent(present, playerId);
 }
 
 // ERROR: Cookies can only be modified in a Server Action or Route Handler. Read more:
 // https://nextjs.org/docs/app/api-reference/functions/cookies#options
-async function createSessionCookie(playerId: string, roomId: string) {
+async function createSessionCookie(playerId: string) {
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  const session = playerId + ":" + roomId;
+  const session = playerId;
   const cookieStore = await cookies();
 
   cookieStore.set("session", session, {
