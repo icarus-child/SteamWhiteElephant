@@ -1,6 +1,6 @@
-import { GetRoomPlayers } from "@/db/players";
-import { headers } from "next/headers";
+import { cookies } from "next/headers";
 import { useParams } from "next/navigation";
+import { JoinAction, PlayerAction } from "@/actions/player_actions";
 
 export function GET() {
   const headers = new Headers();
@@ -13,17 +13,33 @@ export async function UPGRADE(
   client: import("ws").WebSocket,
   server: import("ws").WebSocketServer,
 ) {
-  await headers();
+  const cookieStore = await cookies();
+  if (!cookieStore.has("session")) return;
+  const session = cookieStore.get("session");
+  if (session == undefined) return;
+  const playerId = session.value;
   const roomId = useParams().id as string;
 
   // on connection
   // tell clients to update players and presents
+  const join_action = new JoinAction(playerId);
+  await join_action.SyncRoom(roomId);
   for (const other of server.clients) {
     if (client === other || other.readyState !== other.OPEN) continue;
-    other.send(await GetRoomPlayers(roomId));
+    other.send(JSON.stringify(join_action));
   }
 
   // on client action
-  // 1. parse  2. validate  3. propogate
-  client.on("message", (message) => {});
+  // 1. parse(?)  2. validate  3. propogate
+  client.on("message", (message) => {
+    if (message! instanceof PlayerAction) {
+      console.error("Unknown Action Received from Client");
+      return;
+    }
+    for (const other of server.clients) {
+      if (client !== other && other.readyState === other.OPEN) {
+        other.send(message);
+      }
+    }
+  });
 }

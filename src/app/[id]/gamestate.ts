@@ -1,10 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useWebSocket } from "@/websocket";
 import { Player } from "@/types/player";
 import { useParams } from "next/navigation";
 import { Present } from "@/types/present";
+import {
+  ActionTypes,
+  JoinAction,
+  PlayerAction,
+  RevealAction,
+  TakeAction,
+} from "@/actions/player_actions";
 
 export function usePlayers(url: () => string) {
   const socket = useWebSocket(url);
@@ -16,10 +23,21 @@ export function usePlayers(url: () => string) {
     const controller = new AbortController();
 
     socket?.addEventListener("message", async (event) => {
-      // New Player
       const payload =
         typeof event.data === "string" ? event.data : await event.data.text();
-      const player = JSON.parse;
+      const action = JSON.parse(payload) as PlayerAction;
+      switch (action.type) {
+        case ActionTypes.Join:
+          setPlayers((action as JoinAction).players);
+          break;
+        case ActionTypes.Reveal:
+          break;
+        case ActionTypes.Take:
+          break;
+        default:
+          console.error("error parsing server message");
+          break;
+      }
     });
 
     socket?.addEventListener(
@@ -50,8 +68,22 @@ export function usePresents(url: () => string) {
   useEffect(() => {
     const controller = new AbortController();
 
-    socket?.addEventListener("open", () => {
-      console.log("roomid: " + roomId);
+    socket?.addEventListener("message", async (event) => {
+      const payload =
+        typeof event.data === "string" ? event.data : await event.data.text();
+      const action = JSON.parse(payload) as PlayerAction;
+      switch (action.type) {
+        case ActionTypes.Join:
+          setPresents((action as JoinAction).presents);
+          break;
+        case ActionTypes.Reveal:
+          break;
+        case ActionTypes.Take:
+          break;
+        default:
+          console.error("error parsing server message");
+          break;
+      }
     });
 
     socket?.addEventListener(
