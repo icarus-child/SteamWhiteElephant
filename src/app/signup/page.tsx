@@ -1,9 +1,7 @@
-"use client";
-
 import { GetPlayer } from "@/db/players";
 import Form from "./components/form";
 import { cookies } from "next/headers";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 
 async function checkForSession() {
   const cookieStore = await cookies();
@@ -16,7 +14,7 @@ async function checkForSession() {
     return;
   }
 
-  return useRouter().push(`/${player.room}`);
+  return redirect(`/${player.room}`);
 }
 
 export default async function Signup() {

@@ -1,3 +1,5 @@
+"use client";
+
 import { signup } from "@/actions/auth";
 import { GetSteamGameName, ParseGameId } from "@/actions/steam";
 import { ChangeEvent, FormEvent, JSX, useState } from "react";
