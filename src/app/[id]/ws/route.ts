@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
-import { useParams } from "next/navigation";
 import { JoinAction, PlayerAction } from "@/actions/player_actions";
+import { GetPlayer } from "@/db/players";
 
 export function GET() {
   const headers = new Headers();
@@ -18,15 +18,20 @@ export async function UPGRADE(
   const session = cookieStore.get("session");
   if (session == undefined) return;
   const playerId = session.value;
-  const roomId = useParams().id as string;
+  const player = await GetPlayer(playerId);
+  if (player == undefined) {
+    return;
+  }
+  const roomId = player.room;
 
   // on connection
   // tell clients to update players and presents
+  console.log("player joined");
   const join_action = new JoinAction(playerId);
   await join_action.SyncRoom(roomId);
-  for (const other of server.clients) {
-    if (client === other || other.readyState !== other.OPEN) continue;
-    other.send(JSON.stringify(join_action));
+  for (const client of server.clients) {
+    if (client.readyState !== client.OPEN) continue;
+    client.send(JSON.stringify(join_action));
   }
 
   // on client action

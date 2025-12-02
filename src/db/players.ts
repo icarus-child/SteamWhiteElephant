@@ -3,11 +3,8 @@
 import { Player, RoomPlayer } from "@/types/player";
 import { dburl } from "@/constants";
 
-export async function CreatePlayer(
-  roomid: string,
-  playerid: string,
-  player: Player,
-): Promise<boolean> {
+export async function CreatePlayer(player: RoomPlayer): Promise<boolean> {
+  console.log(player);
   const res = await fetch(dburl + "player/", {
     method: "POST",
     headers: {
@@ -15,8 +12,8 @@ export async function CreatePlayer(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      roomId: roomid,
-      playerId: playerid,
+      roomId: player.room,
+      playerId: player.id,
       name: player.name,
     }),
   });
@@ -45,6 +42,7 @@ export async function GetPlayer(id: string): Promise<RoomPlayer | undefined> {
   }
   return {
     name: json.name,
+    id: id,
     room: json.room,
   };
 }

@@ -1,7 +1,7 @@
 "use server";
 
 import "server-only";
-import { Player, RoomPlayer } from "@/types/player";
+import { PartialRoomPlayer, Player, RoomPlayer } from "@/types/player";
 import { Present } from "@/types/present";
 import { GetSteamGameInfo, ParseGameId, SteamInfo } from "./steam";
 import { cookies } from "next/headers";
@@ -58,15 +58,20 @@ export async function signup(inputs: Inputs): Promise<string[]> {
     return errors;
   }
 
-  const player: RoomPlayer = {
+  const partial_player: PartialRoomPlayer = {
     name: (nameRaw as FormDataEntryValue).toString(),
     room: (roomRaw as FormDataEntryValue).toString(),
   };
-  const { uuid: playerId, ok: okPlayer } = await createPlayer(player);
+  const { uuid: playerId, ok: okPlayer } = await createPlayer(partial_player);
   if (!okPlayer) {
     errors.push("Internal server error while creating player");
     return errors;
   }
+  const player: RoomPlayer = {
+    name: partial_player.name,
+    id: playerId,
+    room: partial_player.room,
+  };
 
   const present: Present = {
     gifter: player,
@@ -82,12 +87,16 @@ export async function signup(inputs: Inputs): Promise<string[]> {
   redirect("/" + player.room);
 }
 
-async function createPlayer(player: RoomPlayer): Promise<{
+async function createPlayer(player: PartialRoomPlayer): Promise<{
   uuid: string;
   ok: boolean;
 }> {
   const id = crypto.randomUUID();
-  const ok = await CreatePlayer(player.room, id, player as Player);
+  const ok = await CreatePlayer({
+    name: player.name,
+    room: player.room,
+    id: id,
+  });
   return { uuid: id, ok: ok };
 }
 
@@ -98,8 +107,6 @@ export async function createPresent(
   return await CreatePresent(present, playerId);
 }
 
-// ERROR: Cookies can only be modified in a Server Action or Route Handler. Read more:
-// https://nextjs.org/docs/app/api-reference/functions/cookies#options
 async function createSessionCookie(playerId: string) {
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   const session = playerId;

@@ -1,5 +1,3 @@
-"use server";
-
 import { GetRoomPlayers } from "@/db/players";
 import { Player } from "../types/player";
 import { Present } from "../types/present";

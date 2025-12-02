@@ -34,7 +34,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
-  ],
+, "src/app/[id]/page.tsx.old", "src/app/[id]/innerpage.tsx__oil_tmp_837643"  ],
   "exclude": [
     "node_modules"
   ]
