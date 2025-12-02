@@ -6,8 +6,20 @@ import WrappedPresent from "@/app/components/WrappedPresent";
 import { useParams } from "next/navigation";
 import { usePlayers, usePresents } from "./gamestate";
 
+// function checkForSession(roomId: string) {
+//   const cookieStore = await cookies();
+//   if (!cookieStore.has("session")) return;
+//   const session = cookieStore.get("session");
+//   if (session == undefined) redirect("/");
+//   const playerId = session.value;
+//   const player = await GetPlayer(playerId);
+//   if (player == undefined) redirect("/");
+//   if (roomId != player.room) redirect(`/${player.room}`);
+// }
+
 export default function Home() {
   const roomId = useParams().id as string;
+  // checkForSession(roomId);
   const [players] = usePlayers(
     () => `ws://${window.location.host}/${roomId}/ws`,
   );
