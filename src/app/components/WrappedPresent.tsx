@@ -6,6 +6,8 @@ import { CSSProperties, useEffect, useRef, useState } from "react";
 export type WrappedPresentPlaceholderProps = {
   present: Present;
   className: string;
+  onClickAction: () => void;
+  isMyTurn: boolean;
 };
 
 export default function PresentPlaceholder(
@@ -44,22 +46,20 @@ export default function PresentPlaceholder(
           " " +
           props.className
         }
-        onMouseEnter={() => setIsHovered(true)}
+        onMouseEnter={() => {
+          if (props.isMyTurn) setIsHovered(true);
+        }}
         onMouseLeave={() => setIsHovered(false)}
       >
         {isHovered ? (
           <button
             className="absolute text-blue border-2 border-blue p-2 rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-            onClick={() => {
-              setCurrentTags((a) => a + 1);
-            }}
+            onClick={() => props.onClickAction()}
           >
             Take
           </button>
         ) : null}
         {present.tags.map((tag, i) => {
-          console.log(`current: ${currentTags + 1}`);
-          console.log(`max: ${present.maxTags}`);
           if (i < present.maxTags && i > present.maxTags - currentTags - 1)
             return (
               <p key={i} className="text-black">

@@ -43,6 +43,7 @@ export async function GetPlayer(id: string): Promise<RoomPlayer | undefined> {
     name: json.name,
     id: id,
     room: json.room,
+    present: undefined,
   };
 }
 

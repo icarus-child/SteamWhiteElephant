@@ -6,7 +6,7 @@ import WrappedPresent from "@/app/components/WrappedPresent";
 import { useGameState } from "./gamestate";
 import { RoomPlayer } from "@/types/player";
 import { redirect, useParams } from "next/navigation";
-import { useState } from "react";
+import { Present as PresentType } from "@/types/present";
 
 type ClientGameProps = {
   player: RoomPlayer;
@@ -16,27 +16,45 @@ export default function ClientGame({ player }: ClientGameProps) {
   const roomId = useParams().id as string;
   if (roomId != player.room) redirect(`/${player.room}`);
 
-  const [players, presents] = useGameState(
+  const [players, presents, turnIndex, takePresent] = useGameState(
     () => `ws://${window.location.host}/${player.room}/ws`,
     player,
   );
-
-  const [selected, setSelected] = useState<number>(0);
 
   const playerElements = players?.map((player, i) => {
     return (
       <Present
         player={player}
-        selected={i == selected}
+        selected={i == turnIndex}
         key={i}
         className="bg-[#88B799]"
+        onClick={
+          player.present
+            ? () => takePresent((player.present as PresentType).gifterId)
+            : () => {}
+        }
       />
     );
   });
 
   const presentElements = presents?.map((present, i) => {
+    console.log(`players length: ${players.length}, index: ${turnIndex}`);
+    console.log(
+      `player turn's id: ${players[turnIndex].id}, my id: ${player.id}`,
+    );
+    if (players[turnIndex].id == player.id) {
+      console.log("my turn");
+    } else console.log("not my turn");
     return (
-      <WrappedPresent key={i} className="bg-[#B8B799]" present={present} />
+      <WrappedPresent
+        key={i}
+        className="bg-[#B8B799]"
+        isMyTurn={players[turnIndex].id == player.id}
+        present={present}
+        onClickAction={() => {
+          takePresent(present.gifterId);
+        }}
+      />
     );
   });
 

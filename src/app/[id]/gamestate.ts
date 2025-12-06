@@ -3,19 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { useWebSocket } from "@/websocket";
 import { Player } from "@/types/player";
-import { useParams } from "next/navigation";
 import { Present } from "@/types/present";
-import {
-  ActionTypes,
-  OrderCorrectionAction,
-  JoinAction,
-  PlayerAction,
-  TakeAction,
-} from "@/actions/player_actions";
+import { PlayerAction, SendTakeAction } from "@/actions/player_actions";
 
 export function useGameState(url: () => string, this_player: Player) {
   const socket = useWebSocket(url);
-  const roomId = useParams().id as string;
+  // const roomId = useParams().id as string;
 
   const [players, setPlayers] = useState<Player[]>([]);
   const [presents, setPresents] = useState<Present[]>([]);
@@ -29,22 +22,8 @@ export function useGameState(url: () => string, this_player: Player) {
         typeof event.data === "string" ? event.data : await event.data.text();
       const action = JSON.parse(payload) as PlayerAction;
       setTurnIndex(action.turnIndex);
-      switch (action.type) {
-        case ActionTypes.Join:
-          setPlayers((action as JoinAction).players);
-          setPresents((action as JoinAction).presents);
-          break;
-        case ActionTypes.Take:
-          setPlayers((action as TakeAction).players);
-          setPresents((action as TakeAction).presents);
-          break;
-        case ActionTypes.OrderCorrection:
-          setPlayers((action as OrderCorrectionAction).players);
-          break;
-        default:
-          console.error("error parsing server message");
-          break;
-      }
+      setPlayers(action.players);
+      setPresents(action.presents);
     });
 
     socket?.addEventListener(
@@ -63,11 +42,22 @@ export function useGameState(url: () => string, this_player: Player) {
     return () => controller.abort();
   }, [socket]);
 
-  const takePresent = useCallback((presentGifterId: string) => {
-    if (!socket || socket.readyState !== socket.OPEN) return;
-    console.log("Outgoing message:", message);
-    socket.send(JSON.stringify(message));
-  });
+  const takePresent = useCallback(
+    (presentGifterId: string) => {
+      if (!socket || socket.readyState !== socket.OPEN) return;
+      socket.send(
+        JSON.stringify(
+          ((): SendTakeAction => {
+            return {
+              senderId: this_player.id,
+              gifterId: presentGifterId,
+            };
+          })(),
+        ),
+      );
+    },
+    [socket],
+  );
 
   return [players, presents, turnIndex, takePresent] as const;
 }

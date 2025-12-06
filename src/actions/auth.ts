@@ -84,10 +84,9 @@ export async function signup(inputs: Inputs): Promise<string[]> {
     };
   });
   const present: Present = {
-    gifter: player,
+    gifterId: player.id,
     items: parsedItems,
   };
-  console.log(parsedItems[0].maxTags);
 
   const okPresent = await createPresent(present, playerId);
   if (!okPresent) {

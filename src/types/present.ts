@@ -1,7 +1,5 @@
-import { Player } from "./player";
-
 export type Present = {
-  gifter: Player;
+  gifterId: string;
   items: Item[];
 };
 

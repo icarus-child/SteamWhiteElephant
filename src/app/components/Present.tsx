@@ -32,8 +32,9 @@ function SelectedPlayer(props: SelectedPlayerProps) {
 
 export type PresentPlaceholderProps = {
   player: Player;
-  className?: string;
-  selected?: boolean;
+  className: string;
+  selected: boolean;
+  onClick: Function;
 };
 
 export default function PresentPlaceholder(props: PresentPlaceholderProps) {
