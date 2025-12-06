@@ -10,6 +10,7 @@
     "prepare": "next-ws patch"
   },
   "dependencies": {
+    "@tailwindcss/postcss": "^4.1.17",
     "@types/better-sqlite3": "^7.6.12",
     "cheerio": "^1.0.0",
     "next": "^16.0.3",
@@ -30,8 +31,8 @@
     "baseline-browser-mapping": "^2.8.32",
     "eslint": "^9",
     "eslint-config-next": "15.1.2",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.18",
     "typescript": "^5"
   }
 }

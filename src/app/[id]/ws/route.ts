@@ -1,8 +1,18 @@
-import { cookies } from "next/headers";
-import { JoinAction, PlayerAction } from "@/actions/player_actions";
-import { GetPlayer } from "@/db/players";
+"use server";
 
-export function GET() {
+import { cookies } from "next/headers";
+import {
+  ActionTypes,
+  JoinAction,
+  OrderCorrectionAction,
+  PlayerAction,
+} from "@/actions/player_actions";
+import { GetPlayer } from "@/db/players";
+import { Game } from "@/types/room";
+
+let game: Game = { turnOrder: [], turnIndex: 0 };
+
+export async function GET() {
   const headers = new Headers();
   headers.set("Connection", "Upgrade");
   headers.set("Upgrade", "websocket");
@@ -26,21 +36,44 @@ export async function UPGRADE(
 
   // on connection
   // tell clients to update players and presents
-  console.log("player joined");
-  const join_action = new JoinAction(playerId);
+  const sourcePlayer = await GetPlayer(playerId);
+  if (sourcePlayer == undefined) {
+    console.error("Recieved a join request from a player that does not exist");
+    return;
+  }
+  game.turnOrder.push(sourcePlayer);
+  const join_action = new JoinAction(playerId, game.turnOrder, game.turnIndex);
   await join_action.SyncRoom(roomId);
+
   for (const client of server.clients) {
     if (client.readyState !== client.OPEN) continue;
     client.send(JSON.stringify(join_action));
   }
 
   // on client action
-  // 1. parse(?)  2. validate  3. propogate
+  // 1. parse  2. validate  3. propogate
   client.on("message", (message) => {
-    if (message! instanceof PlayerAction) {
-      console.error("Unknown Action Received from Client");
-      return;
+    const parsedMessage: PlayerAction = JSON.parse(
+      message.toString(),
+    ) as PlayerAction;
+    // if (parsedMessage! instanceof PlayerAction) {
+    //   console.error("Unknown Action Received from Client");
+    //   return;
+    // }
+
+    if (parsedMessage.type == ActionTypes.Take) {
+      if (parsedMessage.playerId != game.turnOrder[game.turnIndex].id) {
+        console.error("client attempted turn out of order");
+        client.send(
+          JSON.stringify(
+            new OrderCorrectionAction(game.turnOrder, game.turnIndex),
+          ),
+        );
+        return;
+      }
+      game.turnIndex = (game.turnIndex + 1) % game.turnOrder.length;
     }
+
     for (const other of server.clients) {
       if (client !== other && other.readyState === other.OPEN) {
         other.send(message);

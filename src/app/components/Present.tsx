@@ -1,12 +1,7 @@
 "use client";
 
-import {
-  CSSProperties,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { Player } from "@/types/player";
+import { CSSProperties, useLayoutEffect, useRef, useState } from "react";
 
 type SelectedPlayerProps = {
   selected: boolean;
@@ -36,7 +31,7 @@ function SelectedPlayer(props: SelectedPlayerProps) {
 }
 
 export type PresentPlaceholderProps = {
-  name: string;
+  player: Player;
   className?: string;
   selected?: boolean;
 };
@@ -74,15 +69,17 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
           (props.selected ? "text-yellow-200" : "text-blue-200")
         }
       >
-        {props.name}
+        {props.player.name}
       </div>
-      <div
-        className={
-          "rounded-lg size-full" +
-          " " +
-          (props.className ? props.className : "")
-        }
-      ></div>
+      {props.player.present ? (
+        <div
+          className={
+            "rounded-lg size-full" +
+            " " +
+            (props.className ? props.className : "")
+          }
+        />
+      ) : null}
     </div>
   );
 }

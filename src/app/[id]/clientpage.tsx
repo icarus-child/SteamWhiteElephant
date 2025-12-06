@@ -6,6 +6,7 @@ import WrappedPresent from "@/app/components/WrappedPresent";
 import { useGameState } from "./gamestate";
 import { RoomPlayer } from "@/types/player";
 import { redirect, useParams } from "next/navigation";
+import { useState } from "react";
 
 type ClientGameProps = {
   player: RoomPlayer;
@@ -20,12 +21,23 @@ export default function ClientGame({ player }: ClientGameProps) {
     player,
   );
 
+  const [selected, setSelected] = useState<number>(0);
+
   const playerElements = players?.map((player, i) => {
-    return <Present name={player.name} key={i} className="bg-[#B8B799]" />;
+    return (
+      <Present
+        player={player}
+        selected={i == selected}
+        key={i}
+        className="bg-[#88B799]"
+      />
+    );
   });
 
   const presentElements = presents?.map((present, i) => {
-    return <WrappedPresent key={i} className="bg-[#B8B799]" />;
+    return (
+      <WrappedPresent key={i} className="bg-[#B8B799]" present={present} />
+    );
   });
 
   return (

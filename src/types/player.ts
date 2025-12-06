@@ -1,6 +1,9 @@
+import { Present } from "./present";
+
 export type Player = {
   id: string;
   name: string;
+  present: Present | undefined;
 };
 
 export type RoomPlayer = Player & {

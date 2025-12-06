@@ -9,4 +9,5 @@ export type Item = {
   name: string;
   gameId: number;
   tags: string[];
+  maxTags: number;
 };

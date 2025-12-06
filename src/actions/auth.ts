@@ -1,14 +1,15 @@
 "use server";
 
 import "server-only";
-import { PartialRoomPlayer, Player, RoomPlayer } from "@/types/player";
-import { Present } from "@/types/present";
+import { PartialRoomPlayer, RoomPlayer } from "@/types/player";
+import { Item, Present } from "@/types/present";
 import { GetSteamGameInfo, ParseGameId, SteamInfo } from "./steam";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Inputs } from "@/app/signup/components/form";
 import { CreatePlayer } from "@/db/players";
 import { CreatePresent } from "@/db/present";
+import { randomInt } from "crypto";
 
 export async function signup(inputs: Inputs): Promise<string[]> {
   const nameRaw = inputs.name;
@@ -71,12 +72,22 @@ export async function signup(inputs: Inputs): Promise<string[]> {
     name: partial_player.name,
     id: playerId,
     room: partial_player.room,
+    present: undefined,
   };
 
+  const parsedItems: Item[] = (gameIds as SteamInfo[]).map((game) => {
+    return {
+      name: game.name,
+      gameId: game.gameId,
+      tags: game.tags,
+      maxTags: Math.min(game.tags.length, randomInt(3, 7)),
+    };
+  });
   const present: Present = {
     gifter: player,
-    items: gameIds as SteamInfo[],
+    items: parsedItems,
   };
+  console.log(parsedItems[0].maxTags);
 
   const okPresent = await createPresent(present, playerId);
   if (!okPresent) {
@@ -96,6 +107,7 @@ async function createPlayer(player: PartialRoomPlayer): Promise<{
     name: player.name,
     room: player.room,
     id: id,
+    present: undefined,
   });
   return { uuid: id, ok: ok };
 }

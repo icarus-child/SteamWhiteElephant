@@ -298,6 +298,7 @@ export default function Draggable(props: DraggableProps) {
       ref={ref}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
       onMouseMove={handleMouseMove}
       className={props.className + " " + isSmoothScroll}
     >

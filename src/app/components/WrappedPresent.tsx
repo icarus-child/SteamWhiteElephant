@@ -1,13 +1,19 @@
 "use client";
 
+import { Present } from "@/types/present";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 
-export type PresentPlaceholderProps = {
+export type WrappedPresentPlaceholderProps = {
+  present: Present;
   className: string;
 };
 
-export default function PresentPlaceholder(props: PresentPlaceholderProps) {
+export default function PresentPlaceholder(
+  props: WrappedPresentPlaceholderProps,
+) {
   const [eleStyle, setEleStyle] = useState<CSSProperties>({});
+  const [currentTags, setCurrentTags] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   function updateSize() {
@@ -25,13 +31,43 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
+  const present = props.present.items[0];
   return (
     <div
       ref={ref}
       className="h-1/2 shrink-0 pointer-events-none z-20 snap-center"
       style={eleStyle}
     >
-      <div className={"rounded-lg w-full h-full" + " " + props.className}></div>
+      <div
+        className={
+          "relative rounded-lg w-full h-full pointer-events-auto flex flex-col" +
+          " " +
+          props.className
+        }
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {isHovered ? (
+          <button
+            className="absolute text-blue border-2 border-blue p-2 rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            onClick={() => {
+              setCurrentTags((a) => a + 1);
+            }}
+          >
+            Take
+          </button>
+        ) : null}
+        {present.tags.map((tag, i) => {
+          console.log(`current: ${currentTags + 1}`);
+          console.log(`max: ${present.maxTags}`);
+          if (i < present.maxTags && i > present.maxTags - currentTags - 1)
+            return (
+              <p key={i} className="text-black">
+                {tag}
+              </p>
+            );
+        })}
+      </div>
     </div>
   );
 }

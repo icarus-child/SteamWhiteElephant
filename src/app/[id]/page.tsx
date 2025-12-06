@@ -6,7 +6,6 @@ import ClientGame from "./clientpage";
 
 export default async function ServerGame() {
   const player = await getPlayerWrapper();
-  console.log(`fetched player: ${JSON.stringify(player)}`);
   if (!player) redirect("/");
 
   return <ClientGame player={player} />;

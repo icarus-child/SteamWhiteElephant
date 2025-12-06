@@ -4,7 +4,6 @@ import { Player, RoomPlayer } from "@/types/player";
 import { dburl } from "@/constants";
 
 export async function CreatePlayer(player: RoomPlayer): Promise<boolean> {
-  console.log(player);
   const res = await fetch(dburl + "player/", {
     method: "POST",
     headers: {
