@@ -73,13 +73,11 @@ export async function ParseGameId(
   const regex = new RegExp("(?<=app\\/)\\d+");
 
   if (!regex.test(gameIdRaw.toString())) {
-    console.log("failed regex test");
     return null;
   }
 
   const gameIdRaw2 = gameIdRaw.toString().match(regex)?.[0];
   if (gameIdRaw2 == undefined) {
-    console.log("failed regex match");
     return null;
   }
 

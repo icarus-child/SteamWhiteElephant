@@ -273,7 +273,6 @@ export default function Draggable(props: DraggableProps) {
   }, []);
 
   useEffect(() => {
-    console.log("child count changed");
     setTimeout(resizeHandler, 100);
   }, [React.Children.count(props.children)]);
 

@@ -22,15 +22,17 @@ export async function CreatePlayer(player: RoomPlayer): Promise<boolean> {
   return false;
 }
 
-type JsonPlayer = RoomPlayer & {
-  error: string;
+type JsonPlayer = {
+  playerId: string;
+  roomId: string;
+  name: string;
 };
 
 export async function GetPlayer(id: string): Promise<RoomPlayer | undefined> {
   const response = await fetch(dburl + "player?id=" + id, {
     method: "GET",
   });
-  let json: JsonPlayer;
+  let json: JsonPlayer & { error: string };
   try {
     json = await response.json();
   } catch (error) {
@@ -42,14 +44,14 @@ export async function GetPlayer(id: string): Promise<RoomPlayer | undefined> {
   return {
     name: json.name,
     id: id,
-    room: json.room,
+    room: json.roomId,
     present: undefined,
   };
 }
 
 type JsonPlayers = {
   error: string;
-  players: RoomPlayer[];
+  players: JsonPlayer[];
 };
 
 export async function GetRoomPlayers(id: string): Promise<Player[]> {
@@ -62,10 +64,19 @@ export async function GetRoomPlayers(id: string): Promise<Player[]> {
   try {
     json = await response.json();
   } catch (error) {
+    console.error(error);
     return [];
   }
   if (json.error != null) {
+    console.error(json.error);
     return [];
   }
-  return json.players;
+  return json.players.map((p): RoomPlayer => {
+    return {
+      name: p.name,
+      id: p.playerId,
+      room: p.roomId,
+      present: undefined,
+    };
+  });
 }

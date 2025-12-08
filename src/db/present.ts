@@ -2,6 +2,7 @@
 
 import { dburl } from "@/constants";
 import { Present } from "@/types/present";
+import { randomInt } from "crypto";
 
 export async function CreatePresent(
   present: Present,
@@ -44,7 +45,16 @@ export async function GetRoomPresents(id: string): Promise<Present[]> {
     console.error(json.error);
     return [];
   }
-  return json.presents;
+  return json.presents.map((p): Present => {
+    return {
+      ...p,
+      timesTraded: 0,
+      maxTags: Math.min(
+        Math.min(...p.items.map((i) => i.tags.length)),
+        randomInt(3, 7),
+      ),
+    };
+  });
 }
 
 type JsonPresent = Present & {
@@ -71,5 +81,10 @@ export async function GetPlayerPresent(
   return {
     gifterId: json.gifterId,
     items: json.items,
+    timesTraded: 0,
+    maxTags: Math.min(
+      Math.min(...json.items.map((i) => i.tags.length)),
+      randomInt(3, 7),
+    ),
   };
 }

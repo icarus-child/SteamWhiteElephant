@@ -32,9 +32,11 @@ function SelectedPlayer(props: SelectedPlayerProps) {
 
 export type PresentPlaceholderProps = {
   player: Player;
+  localPlayer: Player;
+  isMyTurn: boolean;
   className: string;
   selected: boolean;
-  onClick: Function;
+  onClickAction: () => void;
 };
 
 export default function PresentPlaceholder(props: PresentPlaceholderProps) {
@@ -56,6 +58,11 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
+  const isFrozen =
+    (props.player.present?.timesTraded ?? 0) >=
+    (props.player.present?.maxTags ?? 0);
+  const isClientsBroughtGift =
+    props.localPlayer.present?.gifterId === props.player.present?.gifterId;
   return (
     <div
       ref={ref}
@@ -75,11 +82,37 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
       {props.player.present ? (
         <div
           className={
-            "rounded-lg size-full" +
+            "rounded-lg size-full pointer-events-auto relative" +
             " " +
             (props.className ? props.className : "")
           }
-        />
+        >
+          {props.isMyTurn ? (
+            <button
+              className={`absolute text-blue border-2 border-blue p-2 rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${isClientsBroughtGift || isFrozen ? " cursor-not-allowed" : ""}`}
+              onClick={() => props.onClickAction()}
+              disabled={isClientsBroughtGift || isFrozen}
+            >
+              {isFrozen ? "Frozen" : isClientsBroughtGift ? "Yours" : "Take"}
+            </button>
+          ) : null}
+
+          {/*  TODO: make multi-item gifts work */}
+          {props.player.present?.items[0]?.tags.map((tag, i) => {
+            if (
+              i < (props.player.present?.maxTags ?? 0) &&
+              i >
+                (props.player.present?.maxTags ?? 0) -
+                  (props.player.present?.timesTraded ?? 0) -
+                  1
+            )
+              return (
+                <p key={i} className="text-black">
+                  {tag}
+                </p>
+              );
+          })}
+        </div>
       ) : null}
     </div>
   );

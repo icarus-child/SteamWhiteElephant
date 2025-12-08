@@ -1,13 +1,15 @@
 "use server";
 
+import "server-only";
 import { PlayerAction, SendTakeAction } from "@/actions/player_actions";
 import { Game } from "@/types/room";
 import { GetRoomPresents } from "@/db/present";
 import { getPlayerWrapper } from "@/actions/fetch_player";
 import { Player } from "@/types/player";
 import { GetRoomPlayers } from "@/db/players";
+import { Present } from "@/types/present";
 
-let game: Game = { turnOrder: [], turnIndex: 0 };
+let game: Game = { turnOrder: [], turnIndex: 0, presents: [] };
 
 function reconcilePlayersWithOrder(
   existingOrder: Player[],
@@ -16,6 +18,17 @@ function reconcilePlayersWithOrder(
   const existingIds = new Set(existingOrder.map((p) => p.id));
   const missingPlayers = dbPlayers.filter((p) => !existingIds.has(p.id));
   return [...existingOrder, ...missingPlayers];
+}
+
+function reconcilePresents(
+  existingPresents: Present[],
+  dbPresents: Present[],
+): Present[] {
+  const existingIds = new Set(existingPresents.map((p) => p.gifterId));
+  const missingPresents = dbPresents.filter(
+    (p) => !existingIds.has(p.gifterId),
+  );
+  return [...existingPresents, ...missingPresents];
 }
 
 export async function GET() {
@@ -41,11 +54,15 @@ export async function UPGRADE(
     game.turnOrder,
     await GetRoomPlayers(sourcePlayer.room),
   );
+  game.presents = reconcilePresents(
+    game.presents,
+    await GetRoomPresents(sourcePlayer.room),
+  );
   const join_action = new PlayerAction(
     sourcePlayer.id,
     game.turnOrder,
     game.turnIndex,
-    await GetRoomPresents(sourcePlayer.room),
+    game.presents,
   );
 
   for (const client of server.clients) {
@@ -60,24 +77,49 @@ export async function UPGRADE(
       message.toString(),
     ) as SendTakeAction;
 
-    const presents = await GetRoomPresents(sourcePlayer.room);
-
     if (parsedMessage.senderId != game.turnOrder[game.turnIndex].id) {
       console.error("client attempted turn out of order");
       client.send(
         JSON.stringify(
-          new PlayerAction("server", game.turnOrder, game.turnIndex, presents),
+          new PlayerAction(
+            "server",
+            game.turnOrder,
+            game.turnIndex,
+            game.presents,
+          ),
         ),
       );
       return;
     }
-    game.turnIndex = (game.turnIndex + 1) % game.turnOrder.length;
+    if (parsedMessage.senderId == parsedMessage.gifterId) {
+      console.error("client attempted to take their own present");
+      return;
+    }
+    const targetPresent = game.presents.find(
+      (present) => present.gifterId === parsedMessage.gifterId,
+    );
+    if (targetPresent === undefined) {
+      console.error("client attempted to take present that doesn't exist");
+      return;
+    }
+    if (targetPresent.timesTraded >= targetPresent.maxTags) {
+      console.error("client attempted to take frozen present");
+      return;
+    }
     const playerIndex = game.turnOrder.findIndex(
       (player) => player.id == sourcePlayer.id,
     );
-    game.turnOrder[playerIndex].present = presents.find(
-      (present) => (present.gifterId = parsedMessage.gifterId),
+    const previousOwner = game.turnOrder.findIndex(
+      (player) => player.present?.gifterId === targetPresent.gifterId,
     );
+    if (previousOwner === -1) {
+      game.turnIndex = (game.turnIndex + 1) % game.turnOrder.length;
+    } else {
+      game.turnOrder[previousOwner].present = undefined;
+      game.turnIndex = previousOwner;
+    }
+    game.turnOrder[playerIndex].present = targetPresent;
+    targetPresent.timesTraded += 1;
 
     for (const other of server.clients) {
       if (other.readyState === other.OPEN) {
@@ -87,7 +129,7 @@ export async function UPGRADE(
               sourcePlayer.id,
               game.turnOrder,
               game.turnIndex,
-              presents,
+              game.presents,
             ),
           ),
         );

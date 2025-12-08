@@ -8,13 +8,13 @@ export type WrappedPresentPlaceholderProps = {
   className: string;
   onClickAction: () => void;
   isMyTurn: boolean;
+  playerId: string;
 };
 
 export default function PresentPlaceholder(
   props: WrappedPresentPlaceholderProps,
 ) {
   const [eleStyle, setEleStyle] = useState<CSSProperties>({});
-  const [currentTags, setCurrentTags] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -33,7 +33,8 @@ export default function PresentPlaceholder(
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
-  const present = props.present.items[0];
+  // TODO: make multi-item gifts work
+  const presentItem = props.present.items[0];
   return (
     <div
       ref={ref}
@@ -53,14 +54,18 @@ export default function PresentPlaceholder(
       >
         {isHovered ? (
           <button
-            className="absolute text-blue border-2 border-blue p-2 rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            className={`absolute text-blue border-2 border-blue p-2 rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${props.present.gifterId === props.playerId ? " cursor-not-allowed" : ""}`}
             onClick={() => props.onClickAction()}
+            disabled={props.present.gifterId === props.playerId}
           >
-            Take
+            {props.present.gifterId != props.playerId ? "Take" : "Yours"}
           </button>
         ) : null}
-        {present.tags.map((tag, i) => {
-          if (i < present.maxTags && i > present.maxTags - currentTags - 1)
+        {presentItem.tags.map((tag, i) => {
+          if (
+            i < props.present.maxTags &&
+            i > props.present.maxTags - props.present.timesTraded - 1
+          )
             return (
               <p key={i} className="text-black">
                 {tag}
