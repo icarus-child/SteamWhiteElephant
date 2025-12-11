@@ -8,6 +8,7 @@ import { getPlayerWrapper } from "@/actions/fetch_player";
 import { Player } from "@/types/player";
 import { GetRoomPlayers } from "@/db/players";
 import { Present } from "@/types/present";
+import { parse } from "path";
 
 let game: Game = { turnOrder: [], turnIndex: 0, presents: [] };
 
@@ -73,6 +74,14 @@ export async function UPGRADE(
   // on client action
   // 1. parse  2. validate  3. propogate
   client.on("message", async (message) => {
+    if (message.toString() === "start game") {
+      for (const other of server.clients) {
+        if (other.readyState === other.OPEN) {
+          other.send(message);
+        }
+      }
+    }
+
     const parsedMessage: SendTakeAction = JSON.parse(
       message.toString(),
     ) as SendTakeAction;
@@ -102,13 +111,19 @@ export async function UPGRADE(
       console.error("client attempted to take present that doesn't exist");
       return;
     }
-    if (targetPresent.timesTraded >= targetPresent.maxTags) {
+    if (targetPresent.timesTraded >= targetPresent.maxTags + 1) {
       console.error("client attempted to take frozen present");
       return;
     }
     const playerIndex = game.turnOrder.findIndex(
       (player) => player.id == sourcePlayer.id,
     );
+    if (game.turnOrder[playerIndex].present !== undefined) {
+      console.error(
+        "client attempted to take present while already having one",
+      );
+      return;
+    }
     const previousOwner = game.turnOrder.findIndex(
       (player) => player.present?.gifterId === targetPresent.gifterId,
     );
@@ -120,6 +135,26 @@ export async function UPGRADE(
     }
     game.turnOrder[playerIndex].present = targetPresent;
     targetPresent.timesTraded += 1;
+
+    // track unopened presents
+    const claimedPresents = game.turnOrder
+      .map((p) => p.present?.gifterId)
+      .filter((i) => i !== undefined);
+    const unopenedPresents = game.presents.filter(
+      (p) => !claimedPresents.includes(p.gifterId),
+    );
+    // calculate breakpoints
+    const halfcount = game.presents.length / 2;
+    switch (unopenedPresents.length) {
+      case halfcount:
+        unopenedPresents.forEach((p) => (p.timesTraded = 3));
+        break;
+      case 1:
+        unopenedPresents[0].timesTraded = unopenedPresents[0].maxTags;
+        break;
+      default:
+        break;
+    }
 
     for (const other of server.clients) {
       if (other.readyState === other.OPEN) {

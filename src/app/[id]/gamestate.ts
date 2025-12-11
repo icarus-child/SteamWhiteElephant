@@ -13,6 +13,7 @@ export function useGameState(url: () => string, this_player: Player) {
   const [players, setPlayers] = useState<Player[]>([]);
   const [presents, setPresents] = useState<Present[]>([]);
   const [turnIndex, setTurnIndex] = useState<number>(0);
+  const [isStarted, setIsStarted] = useState<boolean>(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -20,6 +21,7 @@ export function useGameState(url: () => string, this_player: Player) {
     socket?.addEventListener("message", async (event) => {
       const payload =
         typeof event.data === "string" ? event.data : await event.data.text();
+      if (payload === "start game") setIsStarted(true);
       const action = JSON.parse(payload) as PlayerAction;
       setTurnIndex(action.turnIndex);
       setPlayers(action.players);
@@ -59,5 +61,22 @@ export function useGameState(url: () => string, this_player: Player) {
     [socket],
   );
 
-  return [players, presents, turnIndex, takePresent] as const;
+  const startGame = useCallback(
+    (sender: Player) => {
+      console.log("hit");
+      if (sender.id !== players[0]?.id) return;
+      if (!socket || socket.readyState !== socket.OPEN) return;
+      socket.send("start game");
+    },
+    [socket],
+  );
+
+  return [
+    players,
+    presents,
+    turnIndex,
+    takePresent,
+    isStarted,
+    startGame,
+  ] as const;
 }

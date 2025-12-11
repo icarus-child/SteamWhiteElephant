@@ -97,6 +97,7 @@ export async function signup(inputs: Inputs): Promise<string[]> {
     errors.push("Internal server error while creating present");
     return errors;
   }
+  console.log(player.room);
   await createSessionCookie(playerId);
   redirect("/" + player.room);
 }

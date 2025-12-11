@@ -60,7 +60,7 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
 
   const isFrozen =
     (props.player.present?.timesTraded ?? 0) >=
-    (props.player.present?.maxTags ?? 0);
+    (props.player.present?.maxTags ?? 0) + 1;
   const isClientsBroughtGift =
     props.localPlayer.present?.gifterId === props.player.present?.gifterId;
   return (

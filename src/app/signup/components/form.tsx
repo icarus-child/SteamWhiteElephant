@@ -29,7 +29,7 @@ export type Inputs = {
 export default function Form() {
   const [inputs, setInputs] = useState<Inputs>({
     name: null,
-    room: null,
+    room: "game",
     games: [],
   });
   const [pending, setPending] = useState<boolean>(false);
@@ -99,7 +99,12 @@ export default function Form() {
         <NormalInput name="name" id="inline-name" onChange={handleChange}>
           Player Name
         </NormalInput>
-        <NormalInput name="room" id="inline-room" onChange={handleRoomIdChange}>
+        <NormalInput
+          hidden={true}
+          name="room"
+          id="inline-room"
+          onChange={handleRoomIdChange}
+        >
           Room Id
         </NormalInput>
         <GameList

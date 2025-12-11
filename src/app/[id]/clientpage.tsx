@@ -8,6 +8,8 @@ import { RoomPlayer } from "@/types/player";
 import { redirect, useParams } from "next/navigation";
 import { Present as PresentType } from "@/types/present";
 import { useMemo } from "react";
+import PostGame from "./postgame";
+import Lobby from "./lobby";
 
 type ClientGameProps = {
   player: RoomPlayer;
@@ -17,10 +19,11 @@ export default function ClientGame({ player }: ClientGameProps) {
   const roomId = useParams().id as string;
   if (roomId != player.room) redirect(`/${player.room}`);
 
-  const [players, presents, turnIndex, takePresent] = useGameState(
-    () => `ws://${window.location.host}/${player.room}/ws`,
-    player,
-  );
+  const [players, presents, turnIndex, takePresent, isStarted, startGame] =
+    useGameState(
+      () => `ws://${window.location.host}/${player.room}/ws`,
+      player,
+    );
 
   const claimedPresents = useMemo(() => {
     return players
@@ -30,10 +33,23 @@ export default function ClientGame({ player }: ClientGameProps) {
       });
   }, [players]);
 
+  if (!isStarted) {
+    return (
+      <Lobby
+        player={player}
+        players={players}
+        startGameAction={() => {
+          startGame(player);
+        }}
+      />
+    );
+  }
+
+  if (claimedPresents.length === presents.length) {
+    return <PostGame player={player} players={players} />;
+  }
+
   const presentElements = presents?.map((present, i) => {
-    // if (players[turnIndex].id == player.id) {
-    //   console.log("my turn");
-    // } else console.log("not my turn");
     if (!claimedPresents.includes(present.gifterId)) {
       return (
         <WrappedPresent
