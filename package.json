@@ -10,6 +10,7 @@
     "prepare": "next-ws patch"
   },
   "dependencies": {
+    "@react-three/fiber": "^9.4.2",
     "@tailwindcss/postcss": "^4.1.17",
     "@types/better-sqlite3": "^7.6.12",
     "cheerio": "^1.0.0",
@@ -20,6 +21,7 @@
     "react-device-detect": "^2.2.3",
     "react-dom": "^19.2.0",
     "react-use-websocket": "^3.0.0",
+    "three": "^0.182.0",
     "ws": "^8.18.3"
   },
   "devDependencies": {
