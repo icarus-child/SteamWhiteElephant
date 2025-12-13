@@ -2,9 +2,9 @@
 
 import * as THREE from "three";
 import { Present } from "@/types/present";
-import { CSSProperties, RefObject, useEffect, useRef, useState } from "react";
+import { CSSProperties, useEffect, useRef, useState } from "react";
 import BoosterPack from "./BoosterPack";
-import { Environment, PerspectiveCamera, View } from "@react-three/drei";
+import { Environment, View } from "@react-three/drei";
 
 export type WrappedPresentProps = {
   present: Present;
@@ -12,6 +12,7 @@ export type WrappedPresentProps = {
   onClickAction: () => void;
   isMyTurn: boolean;
   playerId: string;
+  model: any;
 };
 
 export default function WrappedPresent(props: WrappedPresentProps) {
@@ -57,7 +58,7 @@ export default function WrappedPresent(props: WrappedPresentProps) {
       >
         <View className="h-full w-full">
           {/* <PerspectiveCamera position={[0, 0, 10]} /> */}
-          <BoosterPack />
+          <BoosterPack model={props.model} />
           <Environment
             files="/wrapped-present/christmas_photo_studio_01_2k.exr"
             environmentRotation={rotation}

@@ -8,20 +8,23 @@ import { useGameState } from "./gamestate";
 import { RoomPlayer } from "@/types/player";
 import { redirect, useParams } from "next/navigation";
 import { Present as PresentType } from "@/types/present";
-import { RefObject, useMemo, useRef } from "react";
+import { RefObject, useEffect, useMemo, useRef } from "react";
 import PostGame from "./postgame";
 import Lobby from "./lobby";
 import { Canvas } from "@react-three/fiber";
-import { Environment, PerspectiveCamera, View } from "@react-three/drei";
-import BoosterPack from "../test/page";
+import { useGLTF, View } from "@react-three/drei";
 
 type ClientGameProps = {
   player: RoomPlayer;
 };
 
+useGLTF.preload("/wrapped-present/booster-pack.glb");
+
 export default function ClientGame({ player }: ClientGameProps) {
   const roomId = useParams().id as string;
   if (roomId != player.room) redirect(`/${player.room}`);
+
+  const gltf = useGLTF("/wrapped-present/booster-pack.glb");
 
   const [players, presents, turnIndex, takePresent, isStarted, startGame] =
     useGameState(
@@ -66,6 +69,7 @@ export default function ClientGame({ player }: ClientGameProps) {
           onClickAction={() => {
             takePresent(present.gifterId);
           }}
+          model={gltf.scene.clone(true)}
         />
       );
     }

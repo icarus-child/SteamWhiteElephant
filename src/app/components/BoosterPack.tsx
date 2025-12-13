@@ -1,21 +1,25 @@
 "use client";
 
 import * as THREE from "three";
-import { Canvas, useFrame, ThreeElements } from "@react-three/fiber";
+import { useFrame, ThreeElements } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
-import { Environment, useGLTF, useTexture } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { Vector3 } from "three";
+import { useTexture } from "@react-three/drei";
 
-export default function BoosterPack(props: ThreeElements["mesh"]) {
-  const gltf = useGLTF("/wrapped-present/booster-pack.glb");
-  const normalMap = useTexture("/wrapped-present/NormalMap.png");
+type BoosterPackProps = {
+  model: any;
+  extra?: ThreeElements["mesh"];
+};
+
+export default function BoosterPack({ model, extra }: BoosterPackProps) {
   const meshRef = useRef<THREE.Mesh>(null!);
   const { pointer } = useThree();
   const target = new Vector3();
+  const normalMap = useTexture("/wrapped-present/NormalMap.png");
 
   useEffect(() => {
-    gltf.scene.traverse((child) => {
+    model.traverse((child: any) => {
       if (child instanceof THREE.Mesh) {
         if (child.material) {
           child.material.normalMap = normalMap;
@@ -24,7 +28,7 @@ export default function BoosterPack(props: ThreeElements["mesh"]) {
         }
       }
     });
-  }, [gltf, normalMap]);
+  }, [model, normalMap]);
 
   useFrame(() => {
     const mesh = meshRef.current;
@@ -49,26 +53,5 @@ export default function BoosterPack(props: ThreeElements["mesh"]) {
     mesh.rotation.x += (targetRotationX * 0.4 - mesh.rotation.x) * 0.1;
   });
 
-  return (
-    <mesh {...props} ref={meshRef}>
-      <primitive object={gltf.scene} args={[1, 1, 1]} />
-    </mesh>
-  );
-}
-
-function Page() {
-  const rotation = new THREE.Euler(0, Math.PI * 1.0, 0);
-  return (
-    <div className="h-screen w-screen">
-      <Canvas camera={{ position: [0, 0, -10] }} orthographic={false}>
-        <BoosterPack />
-        <Environment
-          files="/wrapped-present/christmas_photo_studio_01_2k.exr"
-          background
-          environmentRotation={rotation}
-          backgroundRotation={rotation}
-        />
-      </Canvas>
-    </div>
-  );
+  return <primitive {...extra} ref={meshRef} object={model} />;
 }
