@@ -1,19 +1,20 @@
 "use client";
 
+import * as THREE from "three";
 import { Present } from "@/types/present";
-import { CSSProperties, useEffect, useRef, useState } from "react";
+import { CSSProperties, RefObject, useEffect, useRef, useState } from "react";
+import BoosterPack from "./BoosterPack";
+import { Environment, PerspectiveCamera, View } from "@react-three/drei";
 
-export type WrappedPresentPlaceholderProps = {
+export type WrappedPresentProps = {
   present: Present;
-  className: string;
+  className?: string;
   onClickAction: () => void;
   isMyTurn: boolean;
   playerId: string;
 };
 
-export default function PresentPlaceholder(
-  props: WrappedPresentPlaceholderProps,
-) {
+export default function WrappedPresent(props: WrappedPresentProps) {
   const [eleStyle, setEleStyle] = useState<CSSProperties>({});
   const [isHovered, setIsHovered] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -33,17 +34,19 @@ export default function PresentPlaceholder(
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
+  const rotation = new THREE.Euler(0, Math.PI * 1.0, 0);
+
   // TODO: make multi-item gifts work
   const presentItem = props.present.items[0];
   return (
     <div
       ref={ref}
-      className="h-1/2 shrink-0 pointer-events-none z-20 snap-center"
+      className="h-full shrink-0 pointer-events-none z-20 snap-center"
       style={eleStyle}
     >
       <div
         className={
-          "relative rounded-lg w-full h-full pointer-events-auto flex flex-col" +
+          "relative rounded-lg w-full h-full pointer-events-auto flex flex-col border-blue-100 border-2" +
           " " +
           props.className
         }
@@ -52,6 +55,15 @@ export default function PresentPlaceholder(
         }}
         onMouseLeave={() => setIsHovered(false)}
       >
+        <View className="h-full w-full">
+          {/* <PerspectiveCamera position={[0, 0, 10]} /> */}
+          <BoosterPack />
+          <Environment
+            files="/wrapped-present/christmas_photo_studio_01_2k.exr"
+            environmentRotation={rotation}
+            backgroundRotation={rotation}
+          />
+        </View>
         {isHovered ? (
           <button
             className={`absolute text-blue border-2 border-blue p-2 rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${props.present.gifterId === props.playerId ? " cursor-not-allowed" : ""}`}
