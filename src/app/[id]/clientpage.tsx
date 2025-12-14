@@ -1,6 +1,5 @@
 "use client";
 
-import * as THREE from "three";
 import Draggable from "@/app/components/Draggable";
 import Present from "@/app/components/Present";
 import WrappedPresent from "@/app/components/WrappedPresent";
@@ -8,17 +7,18 @@ import { useGameState } from "./gamestate";
 import { RoomPlayer } from "@/types/player";
 import { redirect, useParams } from "next/navigation";
 import { Present as PresentType } from "@/types/present";
-import { RefObject, useEffect, useMemo, useRef } from "react";
+import { RefObject, useMemo, useRef } from "react";
 import PostGame from "./postgame";
 import Lobby from "./lobby";
 import { Canvas } from "@react-three/fiber";
 import { useGLTF, View } from "@react-three/drei";
+import ShaderBackground from "../components/ShaderBackground";
+import ResumeOnResize from "../components/ResumeOnResize";
+import WebGLBackground from "../components/WebGLBackground";
 
 type ClientGameProps = {
   player: RoomPlayer;
 };
-
-useGLTF.preload("/wrapped-present/booster-pack.glb");
 
 export default function ClientGame({ player }: ClientGameProps) {
   const roomId = useParams().id as string;
@@ -102,7 +102,7 @@ export default function ClientGame({ player }: ClientGameProps) {
       >
         {playerElements}
       </Draggable>
-
+      <WebGLBackground />
       <div className="fixed h-screen w-screen top-0 left-0">
         <Canvas
           eventSource={container as RefObject<HTMLDivElement>}

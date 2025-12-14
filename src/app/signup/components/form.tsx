@@ -7,6 +7,9 @@ import Button from "@/app/components/Button";
 import { CheckRoom } from "@/db/room";
 import GameList from "./gameInput";
 import NormalInput from "./normalInput";
+import { useGLTF } from "@react-three/drei";
+
+useGLTF.preload("/wrapped-present/booster-pack.glb");
 
 function Errors(errors: string[]): JSX.Element[] {
   const rows = [];

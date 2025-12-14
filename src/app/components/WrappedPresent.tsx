@@ -47,7 +47,7 @@ export default function WrappedPresent(props: WrappedPresentProps) {
     >
       <div
         className={
-          "relative rounded-lg w-full h-full pointer-events-auto flex flex-col border-blue-100 border-2" +
+          "relative rounded-lg w-full h-full pointer-events-auto flex flex-col" +
           " " +
           props.className
         }
@@ -57,7 +57,6 @@ export default function WrappedPresent(props: WrappedPresentProps) {
         onMouseLeave={() => setIsHovered(false)}
       >
         <View className="h-full w-full">
-          {/* <PerspectiveCamera position={[0, 0, 10]} /> */}
           <BoosterPack model={props.model} />
           <Environment
             files="/wrapped-present/christmas_photo_studio_01_2k.exr"
