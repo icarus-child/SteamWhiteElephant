@@ -1,6 +1,5 @@
 "use client";
 
-import * as THREE from "three";
 import Draggable from "@/app/components/Draggable";
 import Present from "@/app/components/Present";
 import WrappedPresent from "@/app/components/WrappedPresent";
@@ -8,37 +7,34 @@ import { useGameState } from "./gamestate";
 import { RoomPlayer } from "@/types/player";
 import { redirect, useParams } from "next/navigation";
 import { Present as PresentType } from "@/types/present";
-import { RefObject, useCallback, useMemo, useRef, useState } from "react";
+import { RefObject, useEffect, useMemo, useRef } from "react";
 import PostGame from "./postgame";
 import Lobby from "./lobby";
 import { Canvas } from "@react-three/fiber";
 import { useGLTF, View } from "@react-three/drei";
 import WebGLBackground from "../components/WebGLBackground";
-import { Group, Object3D, Object3DEventMap } from "three";
-
-function useModelPool(source: THREE.Object3D, count: number) {
-  const pool = useRef<THREE.Object3D[]>([]);
-
-  // Grow pool
-  useMemo(() => {
-    while (pool.current.length < count) {
-      pool.current.push(source.clone(true));
-    }
-  }, [count, source]);
-
-  // Shrink pool (optional)
-  useMemo(() => {
-    pool.current.length = count;
-  }, [count]);
-
-  return pool.current;
-}
 
 type ClientGameProps = {
   player: RoomPlayer;
 };
 
-// const scrollPropogation = () => useCallback();
+const useScrollForwarder = (draggableRef: RefObject<HTMLElement>) =>
+  useEffect(() => {
+    const onWheel = (e: WheelEvent) => {
+      if (!draggableRef.current) return;
+      draggableRef.current.scrollLeft += e.deltaY;
+      e.stopPropagation();
+    };
+
+    window.addEventListener("wheel", onWheel, {
+      passive: true,
+      capture: true,
+    });
+
+    return () => {
+      window.removeEventListener("wheel", onWheel, { capture: true });
+    };
+  }, [draggableRef]);
 
 export default function ClientGame({ player }: ClientGameProps) {
   const roomId = useParams().id as string;
@@ -46,20 +42,14 @@ export default function ClientGame({ player }: ClientGameProps) {
 
   const gltf = useGLTF("/wrapped-present/booster-pack.glb");
 
-  const [scrollEventPresents, setScrollEventPresents] = useState<
-    WheelEvent | undefined
-  >(undefined);
-  const [scrollEventPlayers, setScrollEventPlayers] = useState<
-    WheelEvent | undefined
-  >(undefined);
-
   const [players, presents, turnIndex, takePresent, isStarted, startGame] =
     useGameState(
       () => `ws://${window.location.host}/${player.room}/ws`,
       player,
     );
-  const models = useModelPool(gltf.scene, presents.length);
+
   const container = useRef<HTMLDivElement>(null);
+
   const claimedPresents = useMemo(() => {
     return players
       .map((p) => p.present?.gifterId)
@@ -67,6 +57,11 @@ export default function ClientGame({ player }: ClientGameProps) {
         return e !== undefined;
       });
   }, [players]);
+
+  const topDraggable = useRef<HTMLElement>(null);
+  const bottomDraggable = useRef<HTMLElement>(null);
+  if (topDraggable.current)
+    useScrollForwarder(topDraggable as RefObject<HTMLElement>);
 
   // if (!isStarted) {
   //   return (
@@ -95,8 +90,7 @@ export default function ClientGame({ player }: ClientGameProps) {
           onClickAction={() => {
             takePresent(present.gifterId);
           }}
-          model={models[i]}
-          captureScrollAction={setScrollEventPresents}
+          model={gltf.scene.clone(true)}
         />
       );
     }
@@ -121,15 +115,14 @@ export default function ClientGame({ player }: ClientGameProps) {
   return (
     <div className="h-screen w-screen" ref={container}>
       <Draggable
-        className="overflow-x-scroll overflow-hidden flex flex-row hide-scrollbar p-5 cursor-grab h-2/5"
-        scrollEvent={scrollEventPresents}
+        ref={topDraggable}
+        className="justify-center overflow-x-scroll overflow-hidden flex flex-row items-center hide-scrollbar p-5 cursor-grab h-2/5"
       >
         {presentElements}
       </Draggable>
       <Draggable
         snap={true}
         className="overflow-x-scroll overflow-hidden flex flex-row hide-scrollbar cursor-grab h-3/5"
-        scrollEvent={scrollEventPlayers}
       >
         {playerElements}
       </Draggable>
@@ -137,6 +130,10 @@ export default function ClientGame({ player }: ClientGameProps) {
       <div className="fixed h-screen w-screen top-0 left-0 pointer-events-none">
         <Canvas
           eventSource={container as RefObject<HTMLDivElement>}
+          // events={{
+          //   filter: (events: any) =>
+          //     events.filter((e: any) => e.type !== "wheel"),
+          // }}
           camera={{ position: [0, 0, -2], scale: [0.013, 0.013, 0.02] }}
           orthographic={true}
         >

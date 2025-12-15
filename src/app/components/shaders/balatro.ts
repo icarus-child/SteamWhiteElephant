@@ -1,21 +1,28 @@
-export const vertexShader = /* glsl */ `
+export const vertexShader = /* glsl */ `#version 300 es
+precision highp float;
+
+in vec2 aPosition;
+
 void main() {
-  gl_Position = vec4(position, 1.0);
+  gl_Position = vec4(aPosition, 0.0, 1.0);
 }
 `;
 
-export const fragmentShader = /* glsl */ `
+export const fragmentShader = /* glsl */ `#version 300 es
 precision highp float;
 
-uniform float uTime;
 uniform vec2 uResolution;
+uniform float uTime;
 
-#define SPIN_ROTATION 0.2
+out vec4 outColor;
+
+// ---------------- Original defines ----------------
+#define SPIN_ROTATION 0.05
 #define SPIN_SPEED 2.0
 #define OFFSET vec2(0.0)
-#define COLOUR_1 vec4(0.871, 0.267, 0.231, 1.0)
-#define COLOUR_2 vec4(0.0, 0.42, 0.706, 1.0)
-#define COLOUR_3 vec4(0.086, 0.137, 0.145, 1.0)
+#define COLOUR_1 vec4(0.761,0.396,0.443, 1.0) // outer
+#define COLOUR_2 vec4(0.561,0.29,0.325, 1.0) // inner
+#define COLOUR_3 vec4(0.361,0.188,0.212, 1.0) // middle
 #define CONTRAST 3.5
 #define LIGTHING 0.4
 #define SPIN_AMOUNT 0.25
@@ -23,15 +30,20 @@ uniform vec2 uResolution;
 #define SPIN_EASE 1.5
 #define PI 3.14159265359
 #define IS_ROTATE true
+// --------------------------------------------------
 
 vec4 effect(vec2 screenSize, vec2 screen_coords) {
-    float pixel_size = length(screenSize.xy) / PIXEL_FILTER;
-    vec2 uv = (floor(screen_coords.xy*(1.0/pixel_size))*pixel_size
-              - 0.5*screenSize.xy) / length(screenSize.xy) - OFFSET;
+    // float pixel_size = length(screenSize.xy) / PIXEL_FILTER;
+    float pixel_size = 2.5;
+
+    vec2 uv =
+        (floor(screen_coords * (1.0 / pixel_size)) * pixel_size
+        - 0.5 * screenSize) / length(screenSize)
+        - OFFSET;
 
     float uv_len = length(uv);
 
-    float speed = (SPIN_ROTATION * SPIN_EASE * 0.2);
+    float speed = SPIN_ROTATION * SPIN_EASE * 0.2;
     if (IS_ROTATE) {
         speed = uTime * speed;
     }
@@ -43,7 +55,7 @@ vec4 effect(vec2 screenSize, vec2 screen_coords) {
         - SPIN_EASE * 20.0 *
           (SPIN_AMOUNT * uv_len + (1.0 - SPIN_AMOUNT));
 
-    vec2 mid = (screenSize.xy / length(screenSize.xy)) * 0.5;
+    vec2 mid = (screenSize / length(screenSize)) * 0.5;
 
     uv = vec2(
         uv_len * cos(new_pixel_angle) + mid.x,
@@ -57,12 +69,12 @@ vec4 effect(vec2 screenSize, vec2 screen_coords) {
 
     for (int i = 0; i < 5; i++) {
         uv2 += sin(max(uv.x, uv.y)) + uv;
-        uv  += 0.5 * vec2(
+        uv += 0.5 * vec2(
             cos(5.1123314 + 0.353 * uv2.y + speed * 0.131121),
             sin(uv2.x - 0.113 * speed)
         );
-        uv  -= cos(uv.x + uv.y)
-             - sin(uv.x * 0.711 - uv.y);
+        uv -= cos(uv.x + uv.y)
+            - sin(uv.x * 0.711 - uv.y);
     }
 
     float contrast_mod = (0.25 * CONTRAST + 0.5 * SPIN_AMOUNT + 1.2);
@@ -86,7 +98,7 @@ vec4 effect(vec2 screenSize, vec2 screen_coords) {
 }
 
 void main() {
-  vec2 fragCoord = gl_FragCoord.xy;
-  gl_FragColor = effect(uResolution, fragCoord);
+    vec2 fragCoord = gl_FragCoord.xy;
+    outColor = effect(uResolution, fragCoord);
 }
 `;

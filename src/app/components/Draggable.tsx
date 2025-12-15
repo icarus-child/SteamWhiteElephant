@@ -38,14 +38,15 @@ function Buffer({ snap }: SnapControlledProps) {
       ></div>
     );
   }
+
   return (
     <div
       id="buffer"
       style={{
-        maxWidth: "15em",
-        width: "20%",
+        minWidth: "5em",
+        width: "30%",
         height: "10em",
-        flexShrink: 0,
+        flex: 1,
         pointerEvents: "none",
       }}
     ></div>
@@ -61,6 +62,8 @@ type MousePos = {
 
 export type DraggableProps = {
   className: string;
+  scrollEvent?: WheelEvent;
+  ref?: RefObject<HTMLElement | null>;
   snap?: boolean;
   focus?: number;
   children: React.ReactNode;
@@ -75,13 +78,15 @@ export default function Draggable(props: DraggableProps) {
   });
   const ref: RefObject<HTMLDivElement | null> = useRef(null);
   const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
-  const [isSmoothScroll, setIsSmoothScroll] = useState<string>("");
+  const [scrollClass, setScrollClass] = useState<string>("");
   const [refWidth, setRefWidth] = useState<number>(0);
   const scrollTargetPoint = useRef(0);
   const scrollTargetIndex = useRef(0);
 
   const wheelEventHandlerSnap = useCallback((e: WheelEvent) => {
-    const ele = e.target as HTMLDivElement;
+    // const ele = e.target as HTMLDivElement;
+    if (!ref.current) return;
+    const ele = ref.current;
     if (e.deltaY > 0) {
       scrollTargetIndex.current = Math.min(
         scrollTargetIndex.current + 1,
@@ -108,7 +113,9 @@ export default function Draggable(props: DraggableProps) {
   }, []);
 
   const wheelEventHandlerNoSnap = useCallback((e: WheelEvent) => {
-    const ele = e.target as HTMLDivElement;
+    // const ele = e.target as HTMLDivElement;
+    if (!ref.current) return;
+    const ele = ref.current;
     scrollTargetPoint.current = Math.max(
       Math.min(
         scrollTargetPoint.current + e.deltaY,
@@ -118,6 +125,14 @@ export default function Draggable(props: DraggableProps) {
     );
     ele.scrollLeft = scrollTargetPoint.current;
   }, []);
+
+  if (props.scrollEvent) {
+    if (props.snap) {
+      wheelEventHandlerSnap(props.scrollEvent);
+    } else {
+      wheelEventHandlerNoSnap(props.scrollEvent);
+    }
+  }
 
   function getClosestElementCenter(
     ref: HTMLDivElement,
@@ -237,7 +252,7 @@ export default function Draggable(props: DraggableProps) {
       if (!ref.current) return;
       return (
         <div
-          className="middleline bg-[#bfdbfe30] border-blue-200 border-y-8 h-16 shrink-0 absolute top-0 z-10 pointer-events-none"
+          className="middleline bg-[#946666d0] border-[#CA8888] border-y-8 h-16 shrink-0 absolute top-0 z-10 pointer-events-none shadow-xl shadow-[#401111]/50"
           style={{ width: refWidth }}
         ></div>
       );
@@ -277,8 +292,8 @@ export default function Draggable(props: DraggableProps) {
   }, [React.Children.count(props.children)]);
 
   useEffect(() => {
-    if (isFirefox) setIsSmoothScroll("scroll-smooth");
-    if (isSafari) setIsSmoothScroll("scroll-smooth snap-x");
+    if (isFirefox) setScrollClass("scroll-smooth");
+    if (isSafari) setScrollClass("scroll-smooth snap-x");
   }, [isFirefox]);
 
   useLayoutEffect(() => {
@@ -299,7 +314,20 @@ export default function Draggable(props: DraggableProps) {
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
       onMouseMove={handleMouseMove}
-      className={props.className + " " + isSmoothScroll}
+      className={props.className + " " + scrollClass}
+      //onWheelCapture={(e) => {
+      //  e.preventDefault();
+      //  e.stopPropagation();
+      //  const ele = e.target as HTMLDivElement;
+      //  scrollTargetPoint.current = Math.max(
+      //    Math.min(
+      //      scrollTargetPoint.current + e.deltaY,
+      //      ele.scrollWidth - ele.clientWidth,
+      //    ),
+      //    0,
+      //  );
+      //  ele.scrollLeft = scrollTargetPoint.current;
+      //}}
     >
       <Buffer snap={props.snap} />
       <MiddleLine snap={props.snap} />

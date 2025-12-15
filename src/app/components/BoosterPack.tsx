@@ -9,10 +9,15 @@ import { useTexture } from "@react-three/drei";
 
 type BoosterPackProps = {
   model: any;
+  isHovered: boolean;
   extra?: ThreeElements["mesh"];
 };
 
-export default function BoosterPack({ model, extra }: BoosterPackProps) {
+export default function BoosterPack({
+  model,
+  extra,
+  isHovered,
+}: BoosterPackProps) {
   const meshRef = useRef<THREE.Mesh>(null!);
   const { pointer } = useThree();
   const target = new Vector3();
@@ -33,14 +38,7 @@ export default function BoosterPack({ model, extra }: BoosterPackProps) {
   useFrame(() => {
     const mesh = meshRef.current;
 
-    const dist = mesh.position.distanceTo({
-      x: pointer.x,
-      y: pointer.y,
-      z: 0.5,
-    });
-    const influenceRadius = 1;
-
-    if (dist < influenceRadius) {
+    if (isHovered) {
       target.set(pointer.x, pointer.y, 0.8);
     } else {
       target.set(0, 0, 0);

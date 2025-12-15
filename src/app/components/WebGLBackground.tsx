@@ -1,71 +1,70 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { fragmentShader, vertexShader } from "./shaders/balatro";
 
 export default function WebGLBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current!;
-    const gl = canvas.getContext("webgl", {
-      preserveDrawingBuffer: false,
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // ---- WebGL2 context (explicit) ----
+    const gl = canvas.getContext("webgl2", {
       antialias: false,
+      preserveDrawingBuffer: false,
     });
 
-    if (!gl) return;
+    if (!gl) {
+      console.error("WebGL2 not supported");
+      return;
+    }
 
-    // ---------- Resize ----------
+    // ---- Resize handling ----
     const resize = () => {
       const dpr = window.devicePixelRatio || 1;
-      const w = Math.floor(window.innerWidth * dpr);
-      const h = Math.floor(window.innerHeight * dpr);
-      canvas.width = w;
-      canvas.height = h;
+      const width = Math.floor(window.innerWidth * dpr);
+      const height = Math.floor(window.innerHeight * dpr);
+
+      canvas.width = width;
+      canvas.height = height;
       canvas.style.width = "100vw";
       canvas.style.height = "100vh";
-      gl.viewport(0, 0, w, h);
+
+      gl.viewport(0, 0, width, height);
     };
 
     resize();
     window.addEventListener("resize", resize);
 
-    // ---------- Shaders ----------
-    const vertexSrc = `
-      attribute vec2 position;
-      void main() {
-        gl_Position = vec4(position, 0.0, 1.0);
-      }
-    `;
+    // ---- Shader compilation helpers ----
+    const compileShader = (type: number, source: string) => {
+      const shader = gl.createShader(type)!;
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
 
-    const fragmentSrc = `
-      precision highp float;
-      uniform vec2 uResolution;
-      uniform float uTime;
-
-      void main() {
-        vec2 uv = gl_FragCoord.xy / uResolution;
-        float c = 0.5 + 0.5 * sin(uTime + uv.x * 10.0);
-        gl_FragColor = vec4(c, 0.0, 0.0, 1.0);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.error(gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        throw new Error("Shader compile failed");
       }
-    `;
-
-    const compile = (type: number, src: string) => {
-      const s = gl.createShader(type)!;
-      gl.shaderSource(s, src);
-      gl.compileShader(s);
-      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-        throw gl.getShaderInfoLog(s);
-      }
-      return s;
+      return shader;
     };
 
     const program = gl.createProgram()!;
-    gl.attachShader(program, compile(gl.VERTEX_SHADER, vertexSrc));
-    gl.attachShader(program, compile(gl.FRAGMENT_SHADER, fragmentSrc));
+    gl.attachShader(program, compileShader(gl.VERTEX_SHADER, vertexShader));
+    gl.attachShader(program, compileShader(gl.FRAGMENT_SHADER, fragmentShader));
     gl.linkProgram(program);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error(gl.getProgramInfoLog(program));
+      throw new Error("Program link failed");
+    }
+
     gl.useProgram(program);
 
-    // ---------- Fullscreen quad ----------
+    // ---- Fullscreen quad ----
     const buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(
@@ -74,21 +73,21 @@ export default function WebGLBackground() {
       gl.STATIC_DRAW,
     );
 
-    const posLoc = gl.getAttribLocation(program, "position");
+    const posLoc = gl.getAttribLocation(program, "aPosition");
     gl.enableVertexAttribArray(posLoc);
     gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 
     const timeLoc = gl.getUniformLocation(program, "uTime");
     const resLoc = gl.getUniformLocation(program, "uResolution");
 
-    // ---------- Animation loop ----------
-    let start = performance.now();
+    // ---- Animation loop ----
     let running = true;
+    const startTime = performance.now();
 
     const loop = (now: number) => {
       if (!running) return;
 
-      gl.uniform1f(timeLoc, (now - start) * 0.001);
+      gl.uniform1f(timeLoc, (now - startTime) * 0.001);
       gl.uniform2f(resLoc, canvas.width, canvas.height);
 
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
