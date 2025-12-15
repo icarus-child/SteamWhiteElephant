@@ -126,13 +126,14 @@ export default function Draggable(props: DraggableProps) {
     ele.scrollLeft = scrollTargetPoint.current;
   }, []);
 
-  if (props.scrollEvent) {
+  useEffect(() => {
+    if (!props.scrollEvent) return;
     if (props.snap) {
       wheelEventHandlerSnap(props.scrollEvent);
     } else {
       wheelEventHandlerNoSnap(props.scrollEvent);
     }
-  }
+  }, [props.scrollEvent, props.snap]);
 
   function getClosestElementCenter(
     ref: HTMLDivElement,
