@@ -102,7 +102,7 @@ export default function Draggable(props: DraggableProps) {
     if (scrollLocation == null) {
       return;
     }
-    if (isFirefox) {
+    if (isFirefox || isSafari) {
       ele.scrollLeft = scrollLocation;
     } else {
       ele.scrollTo({
@@ -123,7 +123,14 @@ export default function Draggable(props: DraggableProps) {
       ),
       0,
     );
-    ele.scrollLeft = scrollTargetPoint.current;
+    if (isFirefox || isSafari) {
+      ele.scrollLeft = scrollTargetPoint.current;
+    } else {
+      ele.scrollTo({
+        left: scrollTargetPoint.current,
+        behavior: "smooth",
+      });
+    }
   }, []);
 
   useEffect(() => {
