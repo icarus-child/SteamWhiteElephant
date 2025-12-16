@@ -38,13 +38,12 @@ type ClientGameProps = {
   player: RoomPlayer;
 };
 
-// const scrollPropogation = () => useCallback();
-
 export default function ClientGame({ player }: ClientGameProps) {
   const roomId = useParams().id as string;
   if (roomId != player.room) redirect(`/${player.room}`);
 
   const gltf = useGLTF("/wrapped-present/booster-pack.glb");
+  const scollTargetIndex = useRef(0);
 
   const [scrollEventPresents, setScrollEventPresents] = useState<
     WheelEvent | undefined
@@ -103,13 +102,19 @@ export default function ClientGame({ player }: ClientGameProps) {
   });
 
   const playerElements = players?.map((presentPlayer, i) => {
+    const index = players.findIndex((p, i) => {
+      return presentPlayer.present?.gifterId === p.id;
+    });
     return (
       <Present
+        model={models[index]}
         player={presentPlayer}
         localPlayer={player}
         isMyTurn={players[turnIndex].id == player.id}
         selected={i == turnIndex}
         key={i}
+        index={i}
+        scrollTargetIndex={scollTargetIndex}
         onClickAction={() =>
           takePresent((presentPlayer.present as PresentType).gifterId)
         }
@@ -126,6 +131,7 @@ export default function ClientGame({ player }: ClientGameProps) {
         {presentElements}
       </Draggable>
       <Draggable
+        scrollTargetIndex={scollTargetIndex}
         snap={true}
         className="overflow-x-scroll overflow-hidden flex flex-row hide-scrollbar cursor-grab h-3/5"
         scrollEvent={scrollEventPlayers}

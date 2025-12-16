@@ -1,17 +1,28 @@
 import type { Metadata } from "next";
-//import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CookiesProvider } from "next-client-cookies/server";
+import { Inter } from "next/font/google";
+import { Fjalla_One } from "next/font/google";
+import { Climate_Crisis } from "next/font/google";
 
-//const geistSans = Geist({
-//  variable: "--font-geist-sans",
-//  subsets: ["latin"],
-//});
-//
-//const geistMono = Geist_Mono({
-//  variable: "--font-geist-mono",
-//  subsets: ["latin"],
-//});
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const fjalla = Fjalla_One({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-fjalla",
+  display: "swap",
+});
+
+const climate = Climate_Crisis({
+  subsets: ["latin"],
+  variable: "--font-climate",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Steam White Elephant",
@@ -25,7 +36,10 @@ export default function RootLayout({
 }>) {
   return (
     <CookiesProvider>
-      <html lang="en" className="bg-background text-text">
+      <html
+        lang="en"
+        className={`bg-background text-text ${inter.variable} ${fjalla.variable} ${climate.variable}`}
+      >
         <head>
           <meta charSet="UTF-8" />
           <meta name="description" content={metadata.description as string} />

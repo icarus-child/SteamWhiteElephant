@@ -67,9 +67,13 @@ export type DraggableProps = {
   snap?: boolean;
   focus?: number;
   children: React.ReactNode;
+  scrollTargetIndex?: React.RefObject<number>;
 };
 
-export default function Draggable(props: DraggableProps) {
+export default function Draggable({
+  scrollTargetIndex,
+  ...props
+}: DraggableProps) {
   const startPos: RefObject<MousePos> = useRef<MousePos>({
     left: 0,
     top: 0,
@@ -81,11 +85,10 @@ export default function Draggable(props: DraggableProps) {
   const [scrollClass, setScrollClass] = useState<string>("");
   const [refWidth, setRefWidth] = useState<number>(0);
   const scrollTargetPoint = useRef(0);
-  const scrollTargetIndex = useRef(0);
 
   const wheelEventHandlerSnap = useCallback((e: WheelEvent) => {
     // const ele = e.target as HTMLDivElement;
-    if (!ref.current) return;
+    if (!ref.current || !scrollTargetIndex) return;
     const ele = ref.current;
     if (e.deltaY > 0) {
       scrollTargetIndex.current = Math.min(
@@ -234,7 +237,7 @@ export default function Draggable(props: DraggableProps) {
     if (!isMouseDown || !ref.current) return;
     resetCursor(ref.current);
     setIsMouseDown(false);
-    if (!props.snap) {
+    if (!props.snap || !scrollTargetIndex) {
       return;
     }
     const { left: scrollLocation, index } = getClosestElementCenter(
@@ -305,6 +308,7 @@ export default function Draggable(props: DraggableProps) {
   }, [isFirefox]);
 
   useLayoutEffect(() => {
+    if (!scrollTargetIndex) return;
     setTimeout(() => {
       if (ref.current == null || !props.snap) {
         return;
@@ -323,19 +327,6 @@ export default function Draggable(props: DraggableProps) {
       onMouseLeave={handleMouseUp}
       onMouseMove={handleMouseMove}
       className={props.className + " " + scrollClass}
-      //onWheelCapture={(e) => {
-      //  e.preventDefault();
-      //  e.stopPropagation();
-      //  const ele = e.target as HTMLDivElement;
-      //  scrollTargetPoint.current = Math.max(
-      //    Math.min(
-      //      scrollTargetPoint.current + e.deltaY,
-      //      ele.scrollWidth - ele.clientWidth,
-      //    ),
-      //    0,
-      //  );
-      //  ele.scrollLeft = scrollTargetPoint.current;
-      //}}
     >
       <Buffer snap={props.snap} />
       <MiddleLine snap={props.snap} />

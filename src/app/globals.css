@@ -36,17 +36,83 @@ body {
   position: relative;
 }
 
-.tilt-wrapper {
-  perspective: 800px;
+.steal-btn:disabled {
+  cursor: default;
 }
 
-.tilt-card {
-  transform-style: preserve-3d;
-  transition: transform 0.15s ease-out;
-  will-change: transform;
+.steal-btn:-moz-focusring {
+  outline: auto;
+}
 
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+.steal-btn svg {
+  display: block;
+  vertical-align: middle;
+}
+
+.steal-btn [hidden] {
+  display: none;
+}
+
+.steal-btn {
+  overflow: hidden;
+  position: relative;
+  background-color: #ffffff;
+}
+
+.steal-btn span {
+  display: grid;
+  inset: 0;
+  place-items: center;
+  position: absolute;
+  transition: opacity 0.2s ease;
+}
+
+.steal-btn .steal-marquee {
+  --spacing: 7em;
+  --start: 0em;
+  --end: 7em;
+  -webkit-animation: steal-marquee 1.5s linear infinite;
+  animation: steal-marquee 1.5s linear infinite;
+  -webkit-animation-play-state: paused;
+  animation-play-state: paused;
+  opacity: 0;
+  position: relative;
+  text-shadow:
+    #000000 var(--spacing) 0,
+    #ffffff calc(var(--spacing) * -1) 0,
+    #aa00aa calc(var(--spacing) * -2) 0;
+}
+
+.steal-btn:hover {
+  background-color: #ff7b8d;
+}
+
+.steal-btn:hover .steal-marquee {
+  -webkit-animation-play-state: running;
+  animation-play-state: running;
+  opacity: 1;
+}
+
+.steal-btn:hover .steal-text {
+  opacity: 0;
+}
+
+@-webkit-keyframes steal-marquee {
+  0% {
+    transform: translateX(var(--start));
+  }
+
+  to {
+    transform: translateX(var(--end));
+  }
+}
+
+@keyframes steal-marquee {
+  0% {
+    transform: translateX(var(--start));
+  }
+
+  to {
+    transform: translateX(var(--end));
+  }
 }

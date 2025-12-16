@@ -22,6 +22,11 @@ export default {
         gifted: "var(--color-gifted)",
         giftedtransparent: "var(--color-gifted-transparent)",
       },
+      fontFamily: {
+        inter: ["var(--font-inter)", "sans-serif"],
+        fjalla: ["var(--font-fjalla)", "sans-serif"],
+        climate: ["var(--font-climate)", "sans-serif"],
+      },
     },
   },
   plugins: [],

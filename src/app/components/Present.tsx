@@ -1,49 +1,42 @@
 "use client";
 
 import { Player } from "@/types/player";
+import { Environment, OrthographicCamera, View } from "@react-three/drei";
 import React, { CSSProperties, useLayoutEffect, useRef, useState } from "react";
+import Tilt from "react-parallax-tilt";
+import BoosterPack from "./BoosterPack";
 
 function TiltCard({ children }: { children: React.ReactNode }) {
-  const ref = React.useRef<HTMLDivElement>(null);
-
-  function handleMouseMove(e: React.MouseEvent) {
-    const card = ref.current;
-    if (!card) return;
-
-    const rect = card.getBoundingClientRect();
-
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const midX = rect.width / 2;
-    const midY = rect.height / 2;
-
-    const rotateY = ((x - midX) / midX) * 10; // max 10deg
-    const rotateX = -((y - midY) / midY) * 10;
-
-    card.style.transform = `
-      rotateX(${rotateX}deg)
-      rotateY(${rotateY}deg)
-    `;
-  }
-
-  function reset() {
-    const card = ref.current;
-    if (!card) return;
-    card.style.transform = "rotateX(0deg) rotateY(0deg)";
-  }
-
   return (
-    <div className="tilt-wrapper">
+    <Tilt
+      className="w-[65%] h-[65%] flex flex-col place-items-center"
+      tiltMaxAngleX={12}
+      tiltMaxAngleY={12}
+      transitionSpeed={800}
+      scale={1}
+      trackOnWindow={false}
+      tiltReverse={true}
+    >
       <div
-        ref={ref}
-        className="tilt-card"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={reset}
+        className={"rounded-3xl size-full relative"}
+        style={{
+          backgroundImage: `
+                  linear-gradient(
+                    #00000000 50%,
+                    #220000 87%,
+                    #440000 100%
+                  ),
+                  url('/library_balatro_test.jpg')
+                `,
+          backgroundSize: "cover, 105%",
+          backgroundPosition: "center, center",
+          backgroundRepeat: "no-repeat, no-repeat",
+          border: "8px solid #440000",
+        }}
       >
         {children}
       </div>
-    </div>
+    </Tilt>
   );
 }
 
@@ -101,6 +94,9 @@ export type PresentPlaceholderProps = {
   selected: boolean;
   focused?: boolean;
   onClickAction: () => void;
+  model: any;
+  scrollTargetIndex: React.RefObject<number>;
+  index: number;
 };
 
 export default function PresentPlaceholder(props: PresentPlaceholderProps) {
@@ -110,9 +106,9 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
   function updateSize() {
     if (!ref.current) return;
     setEleStyle({
-      width: ref.current.clientHeight * 1,
-      paddingLeft: ref.current.clientHeight * 0.1,
-      paddingRight: ref.current.clientHeight * 0.1,
+      width: ref.current.clientHeight * 0.7,
+      paddingLeft: ref.current.clientHeight * 0.01,
+      paddingRight: ref.current.clientHeight * 0.01,
     });
   }
 
@@ -121,6 +117,14 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
     updateSize();
     return () => window.removeEventListener("resize", updateSize);
   }, []);
+
+  const model = props.model;
+  const [modelScale, setModelScale] = useState<number>(0);
+  useLayoutEffect(() => {
+    if (!ref.current) return;
+    setModelScale(ref.current.clientHeight / 600);
+  }, [ref.current?.clientHeight]);
+  model?.scale.setScalar(modelScale);
 
   const isRevealed =
     (props.player.present?.timesTraded ?? 0) >=
@@ -133,7 +137,7 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
   return (
     <div
       ref={ref}
-      className="h-full w-12 shrink-0 pointer-events-auto z-20 flex flex-col place-items-center snap-center"
+      className="h-full shrink-0 pointer-events-auto z-20 flex flex-col place-items-center snap-center"
       style={eleStyle}
     >
       <SelectedPlayer selected={props.selected ?? false} />
@@ -156,25 +160,7 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
             >
               {props.player.present.items[0].name}
             </h1>
-            <div
-              className={
-                "rounded-3xl h-[65%] w-[55%] relative" + " " + props.className
-              }
-              style={{
-                backgroundImage: `
-                  linear-gradient(
-                    #00000000 50%,
-                    #220000 87%,
-                    #440000 100%
-                  ),
-                  url('/library_balatro_test.jpg')
-                `,
-                backgroundSize: "cover, 105%",
-                backgroundPosition: "center, center",
-                backgroundRepeat: "no-repeat, no-repeat",
-                border: "8px solid #440000", // Define border size and make it transparent
-              }}
-            >
+            <TiltCard>
               <a
                 href={`https://store.steampowered.com/app/${props.player.present.items[0].gameId}`}
                 className="underline absolute bottom-3 text-center w-full text-[#AACCFF] text-lg"
@@ -182,39 +168,60 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
               >
                 steam link
               </a>
-            </div>
+            </TiltCard>
           </>
-        ) : //<View className="h-full w-full pointer-events-auto">
-        //  <BoosterPack model={props.model} isHovered={isHovered} />
-        //  <Environment
-        //    files="/wrapped-present/christmas_photo_studio_01_2k.exr"
-        //    environmentRotation={rotation}
-        //    backgroundRotation={rotation}
-        //  />
-        //</View>
-        //{props.player.present?.items[0]?.tags.map((tag, i) => {
-        //  if (
-        //    i < (props.player.present?.maxTags ?? 0) &&
-        //    i >
-        //      (props.player.present?.maxTags ?? 0) -
-        //        (props.player.present?.timesTraded ?? 0) -
-        //        1
-        //  )
-        //    return (
-        //      <p key={i} className="text-black">
-        //        {tag}
-        //      </p>
-        //    );
-        //})}
-        null
+        ) : (
+          <div className="relative size-full">
+            <View className="h-[85%] w-full pointer-events-auto">
+              <BoosterPack model={props.model} isHovered={false} />
+              <Environment
+                files="/wrapped-present/christmas_photo_studio_01_2k.exr"
+                environmentRotation={[0, Math.PI * 1.0, 0]}
+              />
+              <OrthographicCamera
+                makeDefault
+                position={[0, 0, -2]}
+                zoom={85}
+                rotation={[0, Math.PI, 0]}
+              />
+            </View>
+            <div className="absolute top-[9rem] gap-4 text-center w-full flex flex-col">
+              {props.player.present?.items[0]?.tags.map((tag, i) => {
+                if (
+                  i < (props.player.present?.maxTags ?? 0) &&
+                  i >
+                    (props.player.present?.maxTags ?? 0) -
+                      (props.player.present?.timesTraded ?? 0) -
+                      1
+                )
+                  return (
+                    <>
+                      <p key={i} className="text-black">
+                        {tag}
+                      </p>
+                    </>
+                  );
+              })}
+            </div>
+          </div>
+        )
       ) : null}
-      {props.isMyTurn && props.player.present ? (
+      {props.isMyTurn &&
+      props.player.present &&
+      !isClientsBroughtGift &&
+      props.scrollTargetIndex.current === props.index ? (
         <button
-          className={`pointer-events-auto text-blue border-2 border-blue p-2 rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${isClientsBroughtGift || isFrozen ? " cursor-not-allowed" : ""}`}
           onClick={() => props.onClickAction()}
           disabled={isClientsBroughtGift || isFrozen}
+          className="steal-btn mt-5 text-[#FF7B8D] font-black text-3xl rounded-xl hover:rounded-b-3xl hover:rounded-t-lg transition-[border-radius] py-2 px-10"
         >
-          {isFrozen ? "Frozen" : isClientsBroughtGift ? "Yours" : "Take"}
+          <span className="steal-text font-fjalla">STEAL</span>
+          <span
+            aria-hidden={false}
+            className="steal-marquee font-climate text-white"
+          >
+            STEAL
+          </span>
         </button>
       ) : null}
     </div>
