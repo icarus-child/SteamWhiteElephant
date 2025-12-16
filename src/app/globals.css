@@ -35,3 +35,18 @@ body {
 :has(> .middleline) {
   position: relative;
 }
+
+.tilt-wrapper {
+  perspective: 800px;
+}
+
+.tilt-card {
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out;
+  will-change: transform;
+
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}

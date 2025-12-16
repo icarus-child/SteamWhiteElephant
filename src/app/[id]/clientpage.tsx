@@ -110,7 +110,6 @@ export default function ClientGame({ player }: ClientGameProps) {
         isMyTurn={players[turnIndex].id == player.id}
         selected={i == turnIndex}
         key={i}
-        className="bg-[#88B799]"
         onClickAction={() =>
           takePresent((presentPlayer.present as PresentType).gifterId)
         }
