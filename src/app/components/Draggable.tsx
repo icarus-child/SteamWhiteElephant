@@ -67,13 +67,9 @@ export type DraggableProps = {
   snap?: boolean;
   focus?: number;
   children: React.ReactNode;
-  scrollTargetIndex?: React.RefObject<number>;
 };
 
-export default function Draggable({
-  scrollTargetIndex,
-  ...props
-}: DraggableProps) {
+export default function Draggable(props: DraggableProps) {
   const startPos: RefObject<MousePos> = useRef<MousePos>({
     left: 0,
     top: 0,
@@ -85,10 +81,11 @@ export default function Draggable({
   const [scrollClass, setScrollClass] = useState<string>("");
   const [refWidth, setRefWidth] = useState<number>(0);
   const scrollTargetPoint = useRef(0);
+  const scrollTargetIndex = useRef(0);
 
   const wheelEventHandlerSnap = useCallback((e: WheelEvent) => {
     // const ele = e.target as HTMLDivElement;
-    if (!ref.current || !scrollTargetIndex) return;
+    if (!ref.current) return;
     const ele = ref.current;
     if (e.deltaY > 0) {
       scrollTargetIndex.current = Math.min(
@@ -237,7 +234,7 @@ export default function Draggable({
     if (!isMouseDown || !ref.current) return;
     resetCursor(ref.current);
     setIsMouseDown(false);
-    if (!props.snap || !scrollTargetIndex) {
+    if (!props.snap) {
       return;
     }
     const { left: scrollLocation, index } = getClosestElementCenter(
@@ -308,7 +305,6 @@ export default function Draggable({
   }, [isFirefox]);
 
   useLayoutEffect(() => {
-    if (!scrollTargetIndex) return;
     setTimeout(() => {
       if (ref.current == null || !props.snap) {
         return;

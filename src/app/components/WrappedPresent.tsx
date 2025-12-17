@@ -84,17 +84,22 @@ export default function WrappedPresent(props: WrappedPresentProps) {
           {props.present.gifterId != props.playerId ? "TAKE" : "Yours"}
         </button>
       ) : null}
-      {presentItem.tags.map((tag, i) => {
-        if (
-          i < props.present.maxTags &&
-          i > props.present.maxTags - props.present.timesTraded - 1
-        )
-          return (
-            <p key={i} className="text-black">
-              {tag}
-            </p>
-          );
-      })}
+      <div className="absolute top-[9rem] gap-4 text-center w-full flex flex-col">
+        {props.present.items[0]?.tags.map((tag, i) => {
+          if (
+            i < (props.present.maxTags ?? 0) &&
+            i >
+              (props.present.maxTags ?? 0) -
+                (props.present.timesTraded ?? 0) -
+                1
+          )
+            return (
+              <p key={i} className="text-black pointer-events-none">
+                {tag}
+              </p>
+            );
+        })}
+      </div>
     </div>
   );
 }

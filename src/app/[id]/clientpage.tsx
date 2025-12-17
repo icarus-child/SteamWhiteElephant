@@ -8,25 +8,22 @@ import { useGameState } from "./gamestate";
 import { RoomPlayer } from "@/types/player";
 import { redirect, useParams } from "next/navigation";
 import { Present as PresentType } from "@/types/present";
-import { RefObject, useCallback, useMemo, useRef, useState } from "react";
+import { RefObject, useMemo, useRef, useState } from "react";
 import PostGame from "./postgame";
 import Lobby from "./lobby";
 import { Canvas } from "@react-three/fiber";
 import { useGLTF, View } from "@react-three/drei";
 import WebGLBackground from "../components/WebGLBackground";
-import { Group, Object3D, Object3DEventMap } from "three";
 
 function useModelPool(source: THREE.Object3D, count: number) {
   const pool = useRef<THREE.Object3D[]>([]);
 
-  // Grow pool
   useMemo(() => {
     while (pool.current.length < count) {
       pool.current.push(source.clone(true));
     }
   }, [count, source]);
 
-  // Shrink pool (optional)
   useMemo(() => {
     pool.current.length = count;
   }, [count]);
@@ -43,12 +40,8 @@ export default function ClientGame({ player }: ClientGameProps) {
   if (roomId != player.room) redirect(`/${player.room}`);
 
   const gltf = useGLTF("/wrapped-present/booster-pack.glb");
-  const scollTargetIndex = useRef(0);
 
   const [scrollEventPresents, setScrollEventPresents] = useState<
-    WheelEvent | undefined
-  >(undefined);
-  const [scrollEventPlayers, setScrollEventPlayers] = useState<
     WheelEvent | undefined
   >(undefined);
 
@@ -102,7 +95,7 @@ export default function ClientGame({ player }: ClientGameProps) {
   });
 
   const playerElements = players?.map((presentPlayer, i) => {
-    const index = players.findIndex((p, i) => {
+    const index = players.findIndex((p) => {
       return presentPlayer.present?.gifterId === p.id;
     });
     return (
@@ -113,8 +106,6 @@ export default function ClientGame({ player }: ClientGameProps) {
         isMyTurn={players[turnIndex].id == player.id}
         selected={i == turnIndex}
         key={i}
-        index={i}
-        scrollTargetIndex={scollTargetIndex}
         onClickAction={() =>
           takePresent((presentPlayer.present as PresentType).gifterId)
         }
@@ -131,10 +122,8 @@ export default function ClientGame({ player }: ClientGameProps) {
         {presentElements}
       </Draggable>
       <Draggable
-        scrollTargetIndex={scollTargetIndex}
         snap={true}
         className="overflow-x-scroll overflow-hidden flex flex-row hide-scrollbar cursor-grab h-3/5"
-        scrollEvent={scrollEventPlayers}
       >
         {playerElements}
       </Draggable>

@@ -1,10 +1,8 @@
 "use client";
 
 import { Player } from "@/types/player";
-import { Environment, OrthographicCamera, View } from "@react-three/drei";
 import React, { CSSProperties, useLayoutEffect, useRef, useState } from "react";
 import Tilt from "react-parallax-tilt";
-import BoosterPack from "./BoosterPack";
 
 function TiltCard({ children }: { children: React.ReactNode }) {
   return (
@@ -12,7 +10,7 @@ function TiltCard({ children }: { children: React.ReactNode }) {
       className="w-[65%] h-[65%] flex flex-col place-items-center"
       tiltMaxAngleX={12}
       tiltMaxAngleY={12}
-      transitionSpeed={800}
+      transitionSpeed={500}
       scale={1}
       trackOnWindow={false}
       tiltReverse={true}
@@ -95,8 +93,6 @@ export type PresentPlaceholderProps = {
   focused?: boolean;
   onClickAction: () => void;
   model: any;
-  scrollTargetIndex: React.RefObject<number>;
-  index: number;
 };
 
 export default function PresentPlaceholder(props: PresentPlaceholderProps) {
@@ -126,14 +122,11 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
   }, [ref.current?.clientHeight]);
   model?.scale.setScalar(modelScale);
 
-  const isRevealed =
-    (props.player.present?.timesTraded ?? 0) >=
-    (props.player.present?.maxTags ?? 0) + 1;
   const isFrozen =
     (props.player.present?.timesTraded ?? 0) >=
     (props.player.present?.maxTags ?? 0) + 1;
   const isClientsBroughtGift =
-    props.localPlayer.present?.gifterId === props.player.present?.gifterId;
+    props.localPlayer.id === props.player.present?.gifterId;
   return (
     <div
       ref={ref}
@@ -152,70 +145,33 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
       </div>
 
       {props.player.present ? (
-        isRevealed || true ? (
-          <>
-            <h1
-              className="pb-3 pt-2 text-2xl font-black text-[#eeeeee]"
-              style={{ textShadow: "10px 10px 10px #11111199" }}
+        <>
+          <h1
+            className="pb-3 pt-2 text-2xl font-black text-[#eeeeee]"
+            style={{ textShadow: "10px 10px 10px #11111199" }}
+          >
+            {props.player.present.items[0].name}
+          </h1>
+          <TiltCard>
+            <a
+              href={`https://store.steampowered.com/app/${props.player.present.items[0].gameId}`}
+              className="underline absolute bottom-3 text-center w-full text-[#AACCFF] text-lg"
+              target="_blank"
             >
-              {props.player.present.items[0].name}
-            </h1>
-            <TiltCard>
-              <a
-                href={`https://store.steampowered.com/app/${props.player.present.items[0].gameId}`}
-                className="underline absolute bottom-3 text-center w-full text-[#AACCFF] text-lg"
-                target="_blank"
-              >
-                steam link
-              </a>
-            </TiltCard>
-          </>
-        ) : (
-          <div className="relative size-full">
-            <View className="h-[85%] w-full pointer-events-auto">
-              <BoosterPack model={props.model} isHovered={false} />
-              <Environment
-                files="/wrapped-present/christmas_photo_studio_01_2k.exr"
-                environmentRotation={[0, Math.PI * 1.0, 0]}
-              />
-              <OrthographicCamera
-                makeDefault
-                position={[0, 0, -2]}
-                zoom={85}
-                rotation={[0, Math.PI, 0]}
-              />
-            </View>
-            <div className="absolute top-[9rem] gap-4 text-center w-full flex flex-col">
-              {props.player.present?.items[0]?.tags.map((tag, i) => {
-                if (
-                  i < (props.player.present?.maxTags ?? 0) &&
-                  i >
-                    (props.player.present?.maxTags ?? 0) -
-                      (props.player.present?.timesTraded ?? 0) -
-                      1
-                )
-                  return (
-                    <>
-                      <p key={i} className="text-black">
-                        {tag}
-                      </p>
-                    </>
-                  );
-              })}
-            </div>
-          </div>
-        )
+              steam link
+            </a>
+          </TiltCard>
+        </>
       ) : null}
-      {props.isMyTurn &&
-      props.player.present &&
-      !isClientsBroughtGift &&
-      props.scrollTargetIndex.current === props.index ? (
+      {props.isMyTurn && props.player.present ? (
         <button
           onClick={() => props.onClickAction()}
           disabled={isClientsBroughtGift || isFrozen}
-          className="steal-btn mt-5 text-[#FF7B8D] font-black text-3xl rounded-xl hover:rounded-b-3xl hover:rounded-t-lg transition-[border-radius] py-2 px-10"
+          className="steal-btn mt-5 text-[#FF7B8D] font-black text-3xl rounded-xl disabled:pointer-events-none disabled:text-[#404040] disabled:bg-[#a0a0a0] hover:rounded-b-3xl hover:rounded-t-lg transition-[border-radius] py-2 px-10"
         >
-          <span className="steal-text font-fjalla">STEAL</span>
+          <span className="steal-text font-fjalla">
+            {isClientsBroughtGift ? "YOURS" : "STEAL"}
+          </span>
           <span
             aria-hidden={false}
             className="steal-marquee font-climate text-white"
