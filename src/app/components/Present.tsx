@@ -92,7 +92,6 @@ export type PresentPlaceholderProps = {
   selected: boolean;
   focused?: boolean;
   onClickAction: () => void;
-  model: any;
 };
 
 export default function PresentPlaceholder(props: PresentPlaceholderProps) {
@@ -113,14 +112,6 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
     updateSize();
     return () => window.removeEventListener("resize", updateSize);
   }, []);
-
-  const model = props.model;
-  const [modelScale, setModelScale] = useState<number>(0);
-  useLayoutEffect(() => {
-    if (!ref.current) return;
-    setModelScale(ref.current.clientHeight / 600);
-  }, [ref.current?.clientHeight]);
-  model?.scale.setScalar(modelScale);
 
   const isFrozen =
     (props.player.present?.timesTraded ?? 0) >=

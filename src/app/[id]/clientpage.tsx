@@ -100,7 +100,6 @@ export default function ClientGame({ player }: ClientGameProps) {
     });
     return (
       <Present
-        model={models[index]}
         player={presentPlayer}
         localPlayer={player}
         isMyTurn={players[turnIndex].id == player.id}
