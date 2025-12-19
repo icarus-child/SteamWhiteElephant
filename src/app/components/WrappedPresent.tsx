@@ -51,8 +51,6 @@ export default function WrappedPresent(props: WrappedPresentProps) {
   }, [ref.current?.clientHeight]);
   model.scale.setScalar(modelScale);
 
-  const rotation = new THREE.Euler(0, Math.PI * 1.0, 0);
-
   // TODO: make multi-item gifts work
   return (
     <div
@@ -78,8 +76,7 @@ export default function WrappedPresent(props: WrappedPresentProps) {
         <BoosterPack model={props.model} isHovered={isHovered} />
         <Environment
           files="/wrapped-present/christmas_photo_studio_01_2k.exr"
-          environmentRotation={rotation}
-          backgroundRotation={rotation}
+          environmentRotation={[0, Math.PI, 0]}
         />
       </View>
       {(isHovered || isMobile) && props.isMyTurn ? (
