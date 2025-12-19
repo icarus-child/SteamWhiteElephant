@@ -49,10 +49,7 @@ export async function GetRoomPresents(id: string): Promise<Present[]> {
     return {
       ...p,
       timesTraded: 0,
-      maxTags: Math.min(
-        Math.min(...p.items.map((i) => i.tags.length)),
-        randomInt(3, 7),
-      ),
+      maxTags: Math.min(Math.min(...p.items.map((i) => i.tags.length)), 4),
     };
   });
 }
@@ -82,9 +79,6 @@ export async function GetPlayerPresent(
     gifterId: json.gifterId,
     items: json.items,
     timesTraded: 0,
-    maxTags: Math.min(
-      Math.min(...json.items.map((i) => i.tags.length)),
-      randomInt(3, 7),
-    ),
+    maxTags: Math.min(Math.min(...json.items.map((i) => i.tags.length)), 4),
   };
 }

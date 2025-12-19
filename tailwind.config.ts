@@ -26,6 +26,8 @@ export default {
         inter: ["var(--font-inter)", "sans-serif"],
         fjalla: ["var(--font-fjalla)", "sans-serif"],
         climate: ["var(--font-climate)", "sans-serif"],
+        inknut: ["var(--font-inknut)", "serif"],
+        flavors: ["var(--font-flavors)", "sans-serif"],
       },
     },
   },

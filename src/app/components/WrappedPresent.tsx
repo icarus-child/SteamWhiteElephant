@@ -11,6 +11,7 @@ import {
 } from "react";
 import BoosterPack from "./BoosterPack";
 import { Environment, View } from "@react-three/drei";
+import { isMobile } from "react-device-detect";
 
 export type WrappedPresentProps = {
   present: Present;
@@ -53,7 +54,6 @@ export default function WrappedPresent(props: WrappedPresentProps) {
   const rotation = new THREE.Euler(0, Math.PI * 1.0, 0);
 
   // TODO: make multi-item gifts work
-  const presentItem = props.present.items[0];
   return (
     <div
       ref={ref}
@@ -67,6 +67,13 @@ export default function WrappedPresent(props: WrappedPresentProps) {
       onMouseLeave={() => setIsHovered(false)}
       onWheel={(e) => props.captureScrollAction(e)}
     >
+      {/* 130 character maximum */}
+      <h1
+        className="place-self-center text-white font-inter font-bold text-xl mt-5 text-center"
+        style={{ textShadow: "10px 10px 10px #11111199" }}
+      >
+        Custom Name
+      </h1>
       <View className="h-full w-full pointer-events-auto">
         <BoosterPack model={props.model} isHovered={isHovered} />
         <Environment
@@ -75,31 +82,29 @@ export default function WrappedPresent(props: WrappedPresentProps) {
           backgroundRotation={rotation}
         />
       </View>
-      {isHovered && props.isMyTurn ? (
+      {(isHovered || isMobile) && props.isMyTurn ? (
         <button
-          className={`absolute bg-white text-[#FF7B8D] p-2 rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${props.present.gifterId === props.playerId ? " cursor-not-allowed" : ""}`}
+          className={`font-fjalla text-2xl absolute bg-white text-[#FF7B8D] active:bg-[#AF5B6D] hover:text-white hover:bg-[#FF7B8D] disabled:text-[#404040] disabled:bg-[#a0a0a0] p-2 rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 ${props.present.gifterId === props.playerId ? " cursor-not-allowed" : ""}`}
           onClick={() => props.onClickAction()}
           disabled={props.present.gifterId === props.playerId}
         >
           {props.present.gifterId != props.playerId ? "TAKE" : "Yours"}
         </button>
       ) : null}
-      <div className="absolute top-[9rem] gap-4 text-center w-full flex flex-col">
-        {props.present.items[0]?.tags.map((tag, i) => {
-          if (
-            i < (props.present.maxTags ?? 0) &&
-            i >
-              (props.present.maxTags ?? 0) -
-                (props.present.timesTraded ?? 0) -
-                1
-          )
+      {!isHovered ? (
+        <div className="absolute top-[30%] gap-4 text-center w-full flex flex-col pointer-events-none z-10 place-items-center">
+          {props.present.items[0]?.tags.slice(1, 7).map((tag, i) => {
             return (
-              <p key={i} className="text-black pointer-events-none">
+              <p
+                key={i}
+                className="w-fit px-2 rounded-xl text-white bg-black/70 font-inter font-bold"
+              >
                 {tag}
               </p>
             );
-        })}
-      </div>
+          })}
+        </div>
+      ) : null}
     </div>
   );
 }

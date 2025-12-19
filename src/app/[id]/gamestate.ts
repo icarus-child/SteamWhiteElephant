@@ -8,8 +8,6 @@ import { PlayerAction, SendTakeAction } from "@/actions/player_actions";
 
 export function useGameState(url: () => string, this_player: Player) {
   const socket = useWebSocket(url);
-  // const roomId = useParams().id as string;
-
   const [players, setPlayers] = useState<Player[]>([]);
   const [presents, setPresents] = useState<Present[]>([]);
   const [turnIndex, setTurnIndex] = useState<number>(0);
@@ -21,11 +19,13 @@ export function useGameState(url: () => string, this_player: Player) {
     socket?.addEventListener("message", async (event) => {
       const payload =
         typeof event.data === "string" ? event.data : await event.data.text();
-      if (payload === "start game") setIsStarted(true);
       const action = JSON.parse(payload) as PlayerAction;
-      setTurnIndex(action.turnIndex);
       setPlayers(action.players);
+      setIsStarted(action.gameStarted);
+      setTurnIndex(action.turnIndex);
       setPresents(action.presents);
+      console.log(`gameStarted: ${action.gameStarted}`);
+      console.log(`isStarted: ${isStarted}`);
     });
 
     socket?.addEventListener(
@@ -63,8 +63,10 @@ export function useGameState(url: () => string, this_player: Player) {
 
   const startGame = useCallback(
     (sender: Player) => {
-      // console.log("hit");
-      if (sender.id !== players[0]?.id) return;
+      // console.log(
+      //   `sender.id: ${sender.id} - players[0]?.id: ${players[0]?.id}`,
+      // );
+      // if (sender.id !== players[0]?.id) return;
       if (!socket || socket.readyState !== socket.OPEN) return;
       socket.send("start game");
     },

@@ -138,7 +138,7 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
       {props.player.present ? (
         <>
           <h1
-            className="pb-3 pt-2 text-2xl font-black text-[#eeeeee]"
+            className="pb-3 pt-2 text-2xl font-black text-[#eeeeee] pointer-events-none font-inter"
             style={{ textShadow: "10px 10px 10px #11111199" }}
           >
             {props.player.present.items[0].name}
@@ -161,7 +161,7 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
           className="steal-btn mt-5 text-[#FF7B8D] font-black text-3xl rounded-xl disabled:pointer-events-none disabled:text-[#404040] disabled:bg-[#a0a0a0] hover:rounded-b-3xl hover:rounded-t-lg transition-[border-radius] py-2 px-10"
         >
           <span className="steal-text font-fjalla">
-            {isClientsBroughtGift ? "YOURS" : "STEAL"}
+            {isFrozen ? "LOCKED" : isClientsBroughtGift ? "YOURS" : "STEAL"}
           </span>
           <span
             aria-hidden={false}

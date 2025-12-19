@@ -20,10 +20,11 @@ async function checkForSession() {
 export default async function Signup() {
   await checkForSession();
   return (
-    <div className="grid w-full h-screen place-content-center">
-      <div className="bg-purple-700 w-96 md:w-fit md:max-w-[768px] md:h-96 md:p-5 p-5 rounded-xl flex flex-col md:flex-row">
-        <Form />
-      </div>
+    <div className="flex flex-col w-full h-screen place-items-center bg-[#4B744C]">
+      <h1 className="font-flavors text-4xl md:text-6xl lg:text-8xl text-white my-20">
+        Steam White Elephant
+      </h1>
+      <Form />
     </div>
   );
 }

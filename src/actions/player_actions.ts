@@ -6,16 +6,19 @@ export class PlayerAction {
   presents: Present[];
   players: Player[];
   turnIndex: number;
+  gameStarted: boolean;
   constructor(
     playerId: string,
     orderedPlayers: Player[],
     turnIndex: number,
     presents: Present[],
+    gameStarted: boolean,
   ) {
     this.playerId = playerId;
     this.players = orderedPlayers;
     this.turnIndex = turnIndex;
     this.presents = presents;
+    this.gameStarted = gameStarted;
   }
   // async SyncRoom(roomId: string) {
   // this.players = await GetRoomPlayers(roomId);

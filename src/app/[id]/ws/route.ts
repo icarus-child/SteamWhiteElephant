@@ -8,9 +8,9 @@ import { getPlayerWrapper } from "@/actions/fetch_player";
 import { Player } from "@/types/player";
 import { GetRoomPlayers } from "@/db/players";
 import { Present } from "@/types/present";
-import { parse } from "path";
 
 let game: Game = { turnOrder: [], turnIndex: 0, presents: [] };
+let gameStarted: boolean = false;
 
 function reconcilePlayersWithOrder(
   existingOrder: Player[],
@@ -30,6 +30,18 @@ function reconcilePresents(
     (p) => !existingIds.has(p.gifterId),
   );
   return [...existingPresents, ...missingPresents];
+}
+
+function shuffle(array: Array<any>) {
+  let currentIndex = array.length;
+  while (currentIndex != 0) {
+    let randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
 }
 
 export async function GET() {
@@ -64,6 +76,7 @@ export async function UPGRADE(
     game.turnOrder,
     game.turnIndex,
     game.presents,
+    gameStarted,
   );
 
   for (const client of server.clients) {
@@ -75,11 +88,27 @@ export async function UPGRADE(
   // 1. parse  2. validate  3. propogate
   client.on("message", async (message) => {
     if (message.toString() === "start game") {
+      if (gameStarted) return;
+      gameStarted = true;
+      console.log("before");
+      shuffle(game.turnOrder);
+      console.log("after");
+      console.log(JSON.stringify(server.clients));
       for (const other of server.clients) {
         if (other.readyState === other.OPEN) {
-          other.send(message);
+          JSON.stringify(
+            new PlayerAction(
+              "server",
+              game.turnOrder,
+              game.turnIndex,
+              game.presents,
+              gameStarted,
+            ),
+          );
         }
       }
+      console.log("done");
+      return;
     }
 
     const parsedMessage: SendTakeAction = JSON.parse(
@@ -95,6 +124,7 @@ export async function UPGRADE(
             game.turnOrder,
             game.turnIndex,
             game.presents,
+            gameStarted,
           ),
         ),
       );
@@ -136,26 +166,6 @@ export async function UPGRADE(
     game.turnOrder[playerIndex].present = targetPresent;
     targetPresent.timesTraded += 1;
 
-    // track unopened presents
-    const claimedPresents = game.turnOrder
-      .map((p) => p.present?.gifterId)
-      .filter((i) => i !== undefined);
-    const unopenedPresents = game.presents.filter(
-      (p) => !claimedPresents.includes(p.gifterId),
-    );
-    // calculate breakpoints
-    const halfcount = game.presents.length / 2;
-    switch (unopenedPresents.length) {
-      case halfcount:
-        unopenedPresents.forEach((p) => (p.timesTraded = 3));
-        break;
-      case 1:
-        unopenedPresents[0].timesTraded = unopenedPresents[0].maxTags;
-        break;
-      default:
-        break;
-    }
-
     for (const other of server.clients) {
       if (other.readyState === other.OPEN) {
         other.send(
@@ -165,6 +175,7 @@ export async function UPGRADE(
               game.turnOrder,
               game.turnIndex,
               game.presents,
+              gameStarted,
             ),
           ),
         );

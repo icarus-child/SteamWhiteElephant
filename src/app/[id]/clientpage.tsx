@@ -60,17 +60,15 @@ export default function ClientGame({ player }: ClientGameProps) {
       });
   }, [players]);
 
-  // if (!isStarted) {
-  //   return (
-  //     <Lobby
-  //       player={player}
-  //       players={players}
-  //       startGameAction={() => {
-  //         startGame(player);
-  //       }}
-  //     />
-  //   );
-  // }
+  if (!isStarted) {
+    return (
+      <Lobby
+        player={player}
+        players={players}
+        startGameAction={() => startGame(player)}
+      />
+    );
+  }
 
   if (claimedPresents.length === presents.length) {
     return <PostGame player={player} players={players} />;
@@ -95,9 +93,6 @@ export default function ClientGame({ player }: ClientGameProps) {
   });
 
   const playerElements = players?.map((presentPlayer, i) => {
-    const index = players.findIndex((p) => {
-      return presentPlayer.present?.gifterId === p.id;
-    });
     return (
       <Present
         player={presentPlayer}

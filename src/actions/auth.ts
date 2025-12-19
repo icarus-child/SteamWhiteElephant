@@ -86,10 +86,7 @@ export async function signup(inputs: Inputs): Promise<string[]> {
     gifterId: player.id,
     items: parsedItems,
     timesTraded: 0,
-    maxTags: Math.min(
-      Math.min(...parsedItems.map((i) => i.tags.length)),
-      randomInt(3, 7),
-    ),
+    maxTags: Math.min(Math.min(...parsedItems.map((i) => i.tags.length)), 4),
   };
 
   const okPresent = await createPresent(present, playerId);

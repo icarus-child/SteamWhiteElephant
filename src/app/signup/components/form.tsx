@@ -5,9 +5,8 @@ import { GetSteamGameName, ParseGameId } from "@/actions/steam";
 import { ChangeEvent, FormEvent, JSX, useState } from "react";
 import Button from "@/app/components/Button";
 import { CheckRoom } from "@/db/room";
-import GameList from "./gameInput";
-import NormalInput from "./normalInput";
 import { useGLTF } from "@react-three/drei";
+import Input from "@/app/components/Input";
 
 useGLTF.preload("/wrapped-present/booster-pack.glb");
 
@@ -70,10 +69,11 @@ export default function Form() {
   };
 
   const handleGameIdChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const inputid = Number(event.target.name);
+    // const inputid = Number(event.target.name);
     const value = event.target.value;
     const { games, ...rest } = inputs;
-    games[inputid] = value;
+    // games[inputid] = value;
+    games[0] = value;
     setInputs({ ...rest, games });
     clearTimeout(timerId);
     timerId = setTimeout(() => {
@@ -97,53 +97,66 @@ export default function Form() {
   };
 
   return (
-    <>
-      <form id="signup" className="w-full max-w-sm" onSubmit={handleSubmit}>
-        <NormalInput name="name" id="inline-name" onChange={handleChange}>
-          Player Name
-        </NormalInput>
-        <NormalInput
-          hidden={true}
-          name="room"
-          id="inline-room"
-          onChange={handleRoomIdChange}
-        >
-          Room Id
-        </NormalInput>
-        <GameList
-          className="md:hidden block"
-          onChange={handleGameIdChange}
-          gameName={gameName}
+    <form
+      id="signup"
+      className="flex lg:flex-row lg:gap-5 gap-10 lg:place-items-start place-items-center flex-col px-20 w-full max-w-[80em]"
+      onSubmit={handleSubmit}
+    >
+      <div className="w-[30em] flex flex-col place-items-center">
+        <h2 className="font-inknut font-semibold text-3xl text-white pb-1">
+          New Gifter
+        </h2>
+        <p className="text-white font-inter pb-6">
+          Enter your player name and room ID
+        </p>
+        <Input
+          id="inline-name"
+          name="name"
+          placeholder="Player Name"
+          onChange={handleChange}
+          type="text"
+          className="mb-4"
         />
-        <div className="md:flex md:items-center">
-          <div className="md:w-1/3"></div>
-          <div className="md:w-2/3">
-            <Button>{submitButton}</Button>
-          </div>
+        <Input
+          id="inline-room"
+          name="room"
+          placeholder="Room ID"
+          onChange={handleRoomIdChange}
+          type="text"
+          className="mb-4"
+          hidden={true}
+        />
+        <Button className="mb-6">{submitButton}</Button>
+        <div className={`${pending ? "" : "hidden"}`}>
+          <div className="font-bold">Loading...</div>
         </div>
-        <div
-          className={
-            "md:items-center flex-row mt-6 " + (pending ? "md:flex" : "hidden")
-          }
-        >
-          <div className="md:w-1/3"></div>
-          <div className="md:w-2/3 font-bold">Loading...</div>
-        </div>
-        <div className={"flex-row " + (pending ? "hidden" : "md:flex")}>
-          <div className="md:w-1/3"></div>
-          <div id="error" className="md:w-2/3 mt-6 text-red-600 font-medium">
+        <div className={`${pending ? "hidden" : ""}`}>
+          <div id="error" className="text-white italic font-medium text-center">
             {Errors(errors)}
           </div>
         </div>
-      </form>
-      <div className="w-[2px] h-full bg-gray-50 rounded-lg self-center hidden md:block mr-2"></div>
-      <div className="hidden md:flex flex-col">
-        <GameList
-          className="hidden md:block"
-          onChange={handleGameIdChange}
-          gameName={gameName}
-        />
       </div>
-    </>
+      <div className="grow" />
+      <div className="w-[30em] flex flex-col place-items-center justify-items-end">
+        <h2 className="font-inknut font-semibold text-3xl text-white pb-1">
+          Steam Gift
+        </h2>
+        <p className="text-white font-inter pb-6">
+          Copy the Steam Game URL or ID into the field below
+        </p>
+        <Input
+          id="game"
+          name="game"
+          type="text"
+          placeholder="https://store.steam..."
+          onChange={handleGameIdChange}
+          form="text"
+          className="mb-4"
+        />
+        <span id="game-name" className="text-white font-inter place-self-start">
+          {gameName}
+        </span>
+      </div>
+    </form>
   );
 }

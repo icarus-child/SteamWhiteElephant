@@ -8,13 +8,17 @@ export type InputProps = {
   name?: string;
   type?: string;
   form?: string;
+  placeholder?: string;
+  disabled?: boolean;
+  hidden?: boolean;
 };
 
 export default function Input(props: InputProps) {
   let { className, ...rest } = props;
-  className =
-    "bg-background appearance-none border-2 rounded w-full py-2 px-4 leading-tight focus:text-primary focus:outline-none focus:border-primary" +
-    " " +
-    (props.className ? props.className : "");
-  return <input className={className} {...rest} />;
+  return (
+    <input
+      className={`bg-white appearance-none rounded-lg placeholder:text-gray-500 text-black font-inter font-medium w-full py-2 px-4 leading-tight outline-[#af4030] focus:outline-2 ${props.className ? props.className : ""}`}
+      {...rest}
+    />
+  );
 }
