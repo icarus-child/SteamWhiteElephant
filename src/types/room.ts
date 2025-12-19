@@ -5,4 +5,6 @@ export type Game = {
   turnOrder: Player[];
   turnIndex: number;
   presents: Present[];
+  roomId: string;
+  gameStarted: boolean;
 };

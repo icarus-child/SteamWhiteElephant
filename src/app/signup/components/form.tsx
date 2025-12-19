@@ -4,7 +4,7 @@ import { signup } from "@/actions/auth";
 import { GetSteamGameName, ParseGameId } from "@/actions/steam";
 import { ChangeEvent, FormEvent, JSX, useState } from "react";
 import Button from "@/app/components/Button";
-import { CheckRoom } from "@/db/room";
+import { RoomExists } from "@/db/room";
 import { useGLTF } from "@react-three/drei";
 import Input from "@/app/components/Input";
 
@@ -57,7 +57,7 @@ export default function Form() {
   };
 
   const checkRoomAvailability = async (roomId: string) => {
-    const exists = await CheckRoom(roomId);
+    const exists = await RoomExists(roomId);
     setSubmitButton(exists ? "Join Room" : "Create Room");
   };
 

@@ -6,14 +6,16 @@ import WebGLBackground from "../components/WebGLBackground";
 type PlayerObjectProps = {
   player: Player;
   isMe: boolean;
+  isHost: boolean;
 };
 
-const PlayerObject = ({ player, isMe }: PlayerObjectProps) => {
+const PlayerObject = ({ player, isMe, isHost }: PlayerObjectProps) => {
   return (
     <p
       className={`font-inter text-xl font-bold ${isMe ? "text-red-300" : "text-white"}`}
     >
-      {player.name}
+      {player.name}{" "}
+      {isHost ? <span className="text-yellow-300">(host)</span> : null}
     </p>
   );
 };
@@ -51,7 +53,12 @@ export default function Lobby({
       )}
       <div className="flex flex-row flex-wrap gap-10 px-20 w-full max-w-6xl">
         {players.map((p, i) => (
-          <PlayerObject player={p} isMe={p.id === player.id} key={i} />
+          <PlayerObject
+            player={p}
+            isMe={p.id === player.id}
+            isHost={p.id === players[0].id}
+            key={i}
+          />
         ))}
       </div>
       {/* <WebGLBackground /> */}

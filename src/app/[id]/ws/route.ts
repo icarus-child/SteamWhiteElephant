@@ -8,9 +8,15 @@ import { getPlayerWrapper } from "@/actions/fetch_player";
 import { Player } from "@/types/player";
 import { GetRoomPlayers } from "@/db/players";
 import { Present } from "@/types/present";
+import { IsRoomStarted, StartRoom } from "@/db/room";
 
-let game: Game = { turnOrder: [], turnIndex: 0, presents: [] };
-let gameStarted: boolean = false;
+let game: Game = {
+  turnOrder: [],
+  turnIndex: 0,
+  presents: [],
+  roomId: "",
+  gameStarted: false,
+};
 
 function reconcilePlayersWithOrder(
   existingOrder: Player[],
@@ -60,6 +66,7 @@ export async function UPGRADE(
     console.error("Recieved a join request from a player that does not exist");
     return;
   }
+  game.roomId = sourcePlayer.room;
 
   // on connection
   // tell clients to update players and presents
@@ -71,43 +78,41 @@ export async function UPGRADE(
     game.presents,
     await GetRoomPresents(sourcePlayer.room),
   );
+  game.gameStarted = (await IsRoomStarted(game.roomId)) ?? false;
   const join_action = new PlayerAction(
     sourcePlayer.id,
     game.turnOrder,
     game.turnIndex,
     game.presents,
-    gameStarted,
+    game.gameStarted,
   );
 
-  for (const client of server.clients) {
-    if (client.readyState !== client.OPEN) continue;
-    client.send(JSON.stringify(join_action));
+  for (const other of server.clients) {
+    if (other.readyState !== other.OPEN) continue;
+    other.send(JSON.stringify(join_action));
   }
 
   // on client action
   // 1. parse  2. validate  3. propogate
   client.on("message", async (message) => {
+    if ((await IsRoomStarted(game.roomId)) ?? false) return;
     if (message.toString() === "start game") {
-      if (gameStarted) return;
-      gameStarted = true;
-      console.log("before");
+      StartRoom(game.roomId);
       shuffle(game.turnOrder);
-      console.log("after");
-      console.log(JSON.stringify(server.clients));
       for (const other of server.clients) {
-        if (other.readyState === other.OPEN) {
+        if (other.readyState !== other.OPEN) continue;
+        other.send(
           JSON.stringify(
             new PlayerAction(
               "server",
               game.turnOrder,
               game.turnIndex,
               game.presents,
-              gameStarted,
+              true,
             ),
-          );
-        }
+          ),
+        );
       }
-      console.log("done");
       return;
     }
 
@@ -124,7 +129,7 @@ export async function UPGRADE(
             game.turnOrder,
             game.turnIndex,
             game.presents,
-            gameStarted,
+            game.gameStarted,
           ),
         ),
       );
@@ -175,7 +180,7 @@ export async function UPGRADE(
               game.turnOrder,
               game.turnIndex,
               game.presents,
-              gameStarted,
+              game.gameStarted,
             ),
           ),
         );
