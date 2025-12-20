@@ -1,6 +1,5 @@
 "use client";
 
-import * as THREE from "three";
 import { Present } from "@/types/present";
 import {
   CSSProperties,

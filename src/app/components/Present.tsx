@@ -1,10 +1,23 @@
 "use client";
 
+import { GetSteamLibraryCapsuleURL } from "@/actions/steam";
 import { Player } from "@/types/player";
-import React, { CSSProperties, useLayoutEffect, useRef, useState } from "react";
+import React, {
+  CSSProperties,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Tilt from "react-parallax-tilt";
 
-function TiltCard({ children }: { children: React.ReactNode }) {
+function TiltCard({
+  children,
+  url,
+}: {
+  children: React.ReactNode;
+  url: string;
+}) {
   return (
     <Tilt
       className="w-[65%] h-[65%] flex flex-col place-items-center"
@@ -24,7 +37,7 @@ function TiltCard({ children }: { children: React.ReactNode }) {
                     #220000 87%,
                     #440000 100%
                   ),
-                  url('/library_balatro_test.jpg')
+                  url('${url}')
                 `,
           backgroundSize: "cover, 105%",
           backgroundPosition: "center, center",
@@ -113,6 +126,11 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
+  const imageUrl = useMemo(() => {
+    if (!props.player.present?.items[0].gameId) return;
+    return `https://cdn.cloudflare.steamstatic.com/steam/apps/${props.player.present?.items[0].gameId}/library_600x900_2x.jpg`;
+  }, [props.player.present?.items[0].gameId]);
+
   const isFrozen =
     (props.player.present?.timesTraded ?? 0) >=
     (props.player.present?.maxTags ?? 0) + 1;
@@ -135,7 +153,7 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
         {props.player.name}
       </div>
 
-      {props.player.present ? (
+      {props.player.present && imageUrl ? (
         <>
           <h1
             className="pb-3 pt-2 text-2xl font-black text-[#eeeeee] pointer-events-none font-inter"
@@ -143,7 +161,7 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
           >
             {props.player.present.items[0].name}
           </h1>
-          <TiltCard>
+          <TiltCard url={imageUrl}>
             <a
               href={`https://store.steampowered.com/app/${props.player.present.items[0].gameId}`}
               className="underline absolute bottom-3 text-center w-full text-[#AACCFF] text-lg"

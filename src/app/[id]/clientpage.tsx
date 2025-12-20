@@ -8,12 +8,13 @@ import { useGameState } from "./gamestate";
 import { RoomPlayer } from "@/types/player";
 import { redirect, useParams } from "next/navigation";
 import { Present as PresentType } from "@/types/present";
-import { RefObject, useMemo, useRef, useState } from "react";
+import { RefObject, useEffect, useMemo, useRef, useState } from "react";
 import PostGame from "./postgame";
 import Lobby from "./lobby";
 import { Canvas } from "@react-three/fiber";
 import { useGLTF, View } from "@react-three/drei";
 import WebGLBackground from "../components/WebGLBackground";
+import { preload } from "react-dom";
 
 function useModelPool(source: THREE.Object3D, count: number) {
   const pool = useRef<THREE.Object3D[]>([]);
@@ -51,6 +52,14 @@ export default function ClientGame({ player }: ClientGameProps) {
       player,
     );
   const models = useModelPool(gltf.scene, presents.length);
+  useEffect(() => {
+    for (const p of presents) {
+      preload(
+        `https://cdn.cloudflare.steamstatic.com/steam/apps/${p.items[0].gameId}/library_600x900_2x.jpg`,
+        { as: "image" },
+      );
+    }
+  });
   const container = useRef<HTMLDivElement>(null);
   const claimedPresents = useMemo(() => {
     return players

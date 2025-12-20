@@ -3,7 +3,15 @@
 import * as THREE from "three";
 import { signup } from "@/actions/auth";
 import { GetSteamGameName, ParseGameId } from "@/actions/steam";
-import { ChangeEvent, FormEvent, JSX, useMemo, useRef, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  JSX,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Button from "@/app/components/Button";
 import { RoomExists } from "@/db/room";
 import { Environment, useGLTF } from "@react-three/drei";
@@ -12,7 +20,6 @@ import { ReactSketchCanvas, ReactSketchCanvasRef } from "react-sketch-canvas";
 import { isFirefox } from "react-device-detect";
 import { Canvas } from "@react-three/fiber";
 import BoosterPack from "@/app/components/BoosterPack";
-import { text } from "stream/consumers";
 
 useGLTF.preload("/wrapped-present/booster-pack.glb");
 
@@ -28,16 +35,42 @@ function Errors(errors: string[]): JSX.Element[] {
   return rows;
 }
 
-function MiniSketchPad() {
+type MiniSketchPadProps = {
+  onTextureChange: (blob: Blob) => void;
+};
+
+function MiniSketchPad({ onTextureChange }: MiniSketchPadProps) {
   const canvasRef = useRef<ReactSketchCanvasRef>(null);
+  // const baseTexture = useTexture("/wrapped-present/Albedo.png");
 
   const [color, setColor] = useState("#6699ff");
   const [mode, setMode] = useState<"pen" | "eraser">("pen");
+  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const backgroundImageRef = useRef<HTMLImageElement | null>(null);
+  const foregroundImageRef = useRef<HTMLImageElement | null>(null);
+
+  useEffect(() => {
+    const bgImg = new window.Image();
+    bgImg.src = "/wrapped-present/AlbedoBackground.png";
+
+    const fgImg = new window.Image();
+    fgImg.src = "/wrapped-present/AlbedoForeground.png";
+
+    bgImg.onload = () => {
+      backgroundImageRef.current = bgImg;
+      syncSketchToTexture();
+    };
+
+    fgImg.onload = () => {
+      foregroundImageRef.current = fgImg;
+      syncSketchToTexture();
+    };
+  }, []);
 
   const rasterCanvas = useMemo(() => {
     const c = document.createElement("canvas");
-    c.width = 512;
-    c.height = 512;
+    c.width = 1024;
+    c.height = 1024;
     return c;
   }, []);
 
@@ -50,8 +83,8 @@ function MiniSketchPad() {
     t.wrapT = THREE.ClampToEdgeWrapping;
 
     // Crop to region: for example, middle half of texture
-    t.repeat.set(3, -2); // scale in U and V
-    t.offset.set(0, 0); // shift in U and V
+    t.repeat.set(1, -1); // scale in U and V
+    // t.offset.set(0, 0); // shift in U and V
 
     // Rotate 90° clockwise around center
     t.center.set(0.5, 0.5); // rotation pivot = center
@@ -64,14 +97,16 @@ function MiniSketchPad() {
     return gltf.scene;
   }, []);
 
-  if (isFirefox) {
-    window.addEventListener("load", function () {
-      var canvas_with_mask = document.querySelector(
-        "#react-sketch-canvas__stroke-group-0",
-      ) as Element;
-      canvas_with_mask.removeAttribute("mask");
-    });
-  }
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!isFirefox) return;
+      document
+        .querySelectorAll('[id^="react-sketch-canvas__stroke-group"]')
+        .forEach((el) => el.removeAttribute("mask"));
+    }, 0);
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   async function syncSketchToTexture() {
     if (!canvasRef.current) return;
@@ -81,22 +116,53 @@ function MiniSketchPad() {
 
     const img = new Image();
     img.onload = () => {
+      if (!backgroundImageRef.current || !foregroundImageRef.current) return;
+      const modelCanvasSize = 1024;
+      const drawingCenter = {
+        x: 820,
+        y: 720,
+      };
+      const drawingCanvasPosition = {
+        x: drawingCenter.x - modelCanvasSize / 2,
+        y: drawingCenter.y - modelCanvasSize / 2,
+      };
+      const drawingCanvasSize = { x: 400, y: 600 };
+      const padding = 1; // leave 1px transparent around edges
+
+      // When drawing, offset strokes by padding
       ctx.clearRect(0, 0, rasterCanvas.width, rasterCanvas.height);
-      ctx.drawImage(img, 0, 0, rasterCanvas.width, rasterCanvas.height);
+      ctx.drawImage(
+        backgroundImageRef.current,
+        0,
+        0,
+        modelCanvasSize,
+        modelCanvasSize,
+      );
+      ctx.drawImage(
+        img,
+        padding + drawingCanvasPosition.x,
+        padding + drawingCanvasPosition.y,
+        drawingCanvasSize.x - 2 * padding,
+        drawingCanvasSize.y - 2 * padding,
+      );
+      ctx.drawImage(
+        foregroundImageRef.current,
+        0,
+        0,
+        modelCanvasSize,
+        modelCanvasSize,
+      );
+      // ctx.drawImage(img, 0, 0, rasterCanvas.width, rasterCanvas.height);
       texture.needsUpdate = true;
+
+      // EXPORT IMAGE FOR FORM
+      rasterCanvas.toBlob((blob) => {
+        if (blob) onTextureChange(blob);
+      }, "image/png");
     };
 
     img.src = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
   }
-
-  model.traverse((child: any) => {
-    if (child instanceof THREE.Mesh) {
-      if (child.material) {
-        child.material.map = texture;
-        child.material.needsUpdate = true;
-      }
-    }
-  });
 
   return (
     <>
@@ -165,9 +231,7 @@ function MiniSketchPad() {
           />
 
           <button
-            onClick={() => {
-              canvasRef.current?.undo();
-            }}
+            onClick={() => canvasRef.current?.undo()}
             className="px-2 py-1 rounded bg-white text-black active:bg-black active:text-white"
             type="button"
           >
@@ -187,9 +251,7 @@ function MiniSketchPad() {
           </button>
 
           <button
-            onClick={() => {
-              canvasRef.current?.redo();
-            }}
+            onClick={() => canvasRef.current?.redo()}
             className="px-2 py-1 rounded bg-white text-black active:bg-black active:text-white"
             type="button"
           >
@@ -207,30 +269,6 @@ function MiniSketchPad() {
               <path d="M19 10h-7a5 5 0 1 0 0 10" />
             </svg>
           </button>
-
-          <button
-            onClick={() => {
-              canvasRef.current?.clearCanvas();
-            }}
-            className="px-2 py-1 rounded bg-white text-black active:bg-black active:text-white"
-            type="button"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M3.06 13a9 9 0 1 0 .49 -4.087"></path>
-              <path d="M3 4.001v5h5"></path>
-              <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-            </svg>
-          </button>
         </div>
 
         {/* Canvas */}
@@ -239,8 +277,8 @@ function MiniSketchPad() {
           ref={canvasRef}
           canvasColor="transparent"
           strokeWidth={8}
-          strokeColor={color}
           eraserWidth={14}
+          strokeColor={color}
           allowOnlyPointerType="all"
           withTimestamp
           // onStroke={() => syncSketchToTexture()}
@@ -248,7 +286,11 @@ function MiniSketchPad() {
         />
       </div>
       <div className="grow" />
-      <div className="h-full w-80">
+      <div
+        className="h-full w-80"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <Canvas
           camera={{ position: [0, 0, -2], scale: [0.013, 0.013, 0.02] }}
           orthographic={true}
@@ -265,7 +307,11 @@ function MiniSketchPad() {
             files="/wrapped-present/christmas_photo_studio_01_2k.exr"
             environmentRotation={[0, Math.PI, 0]}
           />
-          <BoosterPack isHovered={false} model={model} />
+          <BoosterPack
+            isHovered={isHovered}
+            model={model}
+            albedo={texture as Blob}
+          />
         </Canvas>
       </div>
     </>
@@ -276,6 +322,7 @@ export type Inputs = {
   name: string | null;
   room: string | null;
   games: string[];
+  texture: Blob | null;
 };
 
 export default function Form() {
@@ -283,6 +330,7 @@ export default function Form() {
     name: null,
     room: "game",
     games: [],
+    texture: null,
   });
   const [pending, setPending] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
@@ -418,7 +466,11 @@ export default function Form() {
         Wrapping Paper
       </h2>
       <div className="flex flex-row w-full h-[30em]">
-        <MiniSketchPad />
+        <MiniSketchPad
+          onTextureChange={(b: Blob) => {
+            setInputs({ ...inputs, ["texture"]: b });
+          }}
+        />
       </div>
     </form>
   );

@@ -9,12 +9,12 @@ import { redirect } from "next/navigation";
 import { Inputs } from "@/app/signup/components/form";
 import { CreatePlayer } from "@/db/players";
 import { CreatePresent } from "@/db/present";
-import { randomInt } from "crypto";
 
 export async function signup(inputs: Inputs): Promise<string[]> {
   const nameRaw = inputs.name;
   const roomRaw = inputs.room;
   const gameIdsRaw = inputs.games;
+  const texture = inputs.texture;
 
   const errors: string[] = [];
 
@@ -32,6 +32,10 @@ export async function signup(inputs: Inputs): Promise<string[]> {
     errors.push("Room ID not found");
   } else if (roomRaw == "") {
     errors.push("Room ID cannot be empty");
+  }
+
+  if (texture == null) {
+    errors.push("No drawing on present");
   }
 
   if (errors.length > 0) {
@@ -87,6 +91,7 @@ export async function signup(inputs: Inputs): Promise<string[]> {
     items: parsedItems,
     timesTraded: 0,
     maxTags: Math.min(Math.min(...parsedItems.map((i) => i.tags.length)), 4),
+    texture: texture as Blob,
   };
 
   const okPresent = await createPresent(present, playerId);

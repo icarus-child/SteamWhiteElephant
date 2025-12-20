@@ -46,6 +46,7 @@ export function useGameState(url: () => string, this_player: Player) {
 
   const takePresent = useCallback(
     (presentGifterId: string) => {
+      console.log("hit");
       if (!socket || socket.readyState !== socket.OPEN) return;
       socket.send(
         JSON.stringify(

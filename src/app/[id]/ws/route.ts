@@ -95,8 +95,8 @@ export async function UPGRADE(
   // on client action
   // 1. parse  2. validate  3. propogate
   client.on("message", async (message) => {
-    if ((await IsRoomStarted(game.roomId)) ?? false) return;
     if (message.toString() === "start game") {
+      if ((await IsRoomStarted(game.roomId)) ?? false) return;
       StartRoom(game.roomId);
       shuffle(game.turnOrder);
       for (const other of server.clients) {

@@ -10,6 +10,7 @@ import { useTexture } from "@react-three/drei";
 type BoosterPackProps = {
   model: any;
   isHovered: boolean;
+  albedo: Blob | THREE.CanvasTexture<HTMLCanvasElement>;
   extra?: ThreeElements["mesh"];
 };
 
@@ -17,6 +18,7 @@ export default function BoosterPack({
   model,
   extra,
   isHovered,
+  albedo,
 }: BoosterPackProps) {
   const meshRef = useRef<THREE.Mesh>(null!);
   const { pointer } = useThree();
@@ -29,11 +31,14 @@ export default function BoosterPack({
         if (child.material) {
           child.material.normalMap = normalMap;
           child.material.normalScale = new THREE.Vector2(1, 1);
+          child.material.map = albedo;
+          child.material.roughness = 0;
+          child.material.metalness = 0;
           child.material.needsUpdate = true;
         }
       }
     });
-  }, [model, normalMap]);
+  }, [model, normalMap, albedo]);
 
   useFrame(() => {
     const mesh = meshRef.current;

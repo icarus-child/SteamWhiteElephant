@@ -2,7 +2,6 @@
 
 import { dburl } from "@/constants";
 import { Present } from "@/types/present";
-import { randomInt } from "crypto";
 
 export async function CreatePresent(
   present: Present,
@@ -17,6 +16,7 @@ export async function CreatePresent(
     body: JSON.stringify({
       gifterId: playerId,
       items: present.items,
+      texture: present.texture,
     }),
   });
   if (res.status == 200) {
@@ -80,5 +80,6 @@ export async function GetPlayerPresent(
     items: json.items,
     timesTraded: 0,
     maxTags: Math.min(Math.min(...json.items.map((i) => i.tags.length)), 4),
+    texture: json.texture,
   };
 }

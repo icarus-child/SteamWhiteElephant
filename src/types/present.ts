@@ -3,6 +3,7 @@ export type Present = {
   items: Item[];
   timesTraded: number;
   maxTags: number;
+  texture: Blob;
 };
 
 export type Item = {
