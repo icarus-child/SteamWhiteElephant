@@ -78,6 +78,9 @@ export async function UPGRADE(
     game.presents,
     await GetRoomPresents(sourcePlayer.room),
   );
+  // console.log(`present texture: ${game.presents[0].texture.size}`);
+  // const url = URL.createObjectURL(game.presents[0].texture);
+  // console.log(url);
   game.gameStarted = (await IsRoomStarted(game.roomId)) ?? false;
   const join_action = new PlayerAction(
     sourcePlayer.id,

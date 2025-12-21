@@ -307,11 +307,7 @@ function MiniSketchPad({ onTextureChange }: MiniSketchPadProps) {
             files="/wrapped-present/christmas_photo_studio_01_2k.exr"
             environmentRotation={[0, Math.PI, 0]}
           />
-          <BoosterPack
-            isHovered={isHovered}
-            model={model}
-            albedo={texture as Blob}
-          />
+          <BoosterPack isHovered={isHovered} model={model} albedo={texture} />
         </Canvas>
       </div>
     </>

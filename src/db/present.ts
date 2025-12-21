@@ -7,7 +7,19 @@ export async function CreatePresent(
   present: Present,
   playerId: string,
 ): Promise<boolean> {
-  const res = await fetch(dburl + "present/", {
+  const res_tex = await fetch(dburl + "texture/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "image/png",
+      "X-Player-ID": playerId,
+    },
+    body: present.texture,
+  });
+  if (res_tex.status != 200) {
+    return false;
+  }
+
+  const res_pres = await fetch(dburl + "present/", {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -16,13 +28,12 @@ export async function CreatePresent(
     body: JSON.stringify({
       gifterId: playerId,
       items: present.items,
-      texture: present.texture,
     }),
   });
-  if (res.status == 200) {
-    return true;
+  if (res_pres.status != 200) {
+    return false;
   }
-  return false;
+  return true;
 }
 
 type JsonPresents = {
@@ -45,13 +56,21 @@ export async function GetRoomPresents(id: string): Promise<Present[]> {
     console.error(json.error);
     return [];
   }
-  return json.presents.map((p): Present => {
-    return {
-      ...p,
-      timesTraded: 0,
-      maxTags: Math.min(Math.min(...p.items.map((i) => i.tags.length)), 4),
-    };
-  });
+  return await Promise.all(
+    json.presents.map(async (p): Promise<Present> => {
+      // const res = await fetch(dburl + "texture?id=" + p.gifterId, {
+      //   method: "GET",
+      // });
+      // const blob = await res.blob();
+      return {
+        ...p,
+        timesTraded: 0,
+        maxTags: Math.min(Math.min(...p.items.map((i) => i.tags.length)), 4),
+        // texture: blob,
+        texture: undefined,
+      };
+    }),
+  );
 }
 
 type JsonPresent = Present & {

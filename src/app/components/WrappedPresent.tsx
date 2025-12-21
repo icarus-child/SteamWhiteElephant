@@ -1,5 +1,6 @@
 "use client";
 
+import * as THREE from "three";
 import { Present } from "@/types/present";
 import {
   CSSProperties,
@@ -11,6 +12,8 @@ import {
 import BoosterPack from "./BoosterPack";
 import { Environment, View } from "@react-three/drei";
 import { isMobile } from "react-device-detect";
+import { CanvasTexture } from "three";
+import { texture } from "three/tsl";
 
 export type WrappedPresentProps = {
   present: Present;
@@ -19,6 +22,7 @@ export type WrappedPresentProps = {
   isMyTurn: boolean;
   playerId: string;
   model: any;
+  texture?: THREE.Texture;
   captureScrollAction: (e: any) => void;
 };
 
@@ -72,7 +76,11 @@ export default function WrappedPresent(props: WrappedPresentProps) {
         Custom Name
       </h1>
       <View className="h-full w-full pointer-events-auto">
-        <BoosterPack model={props.model} isHovered={isHovered} />
+        <BoosterPack
+          model={props.model}
+          isHovered={isHovered}
+          albedo={props.texture as CanvasTexture}
+        />
         <Environment
           files="/wrapped-present/christmas_photo_studio_01_2k.exr"
           environmentRotation={[0, Math.PI, 0]}

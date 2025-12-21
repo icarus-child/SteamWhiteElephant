@@ -16,12 +16,28 @@ import { useGLTF, View } from "@react-three/drei";
 import WebGLBackground from "../components/WebGLBackground";
 import { preload } from "react-dom";
 
+function deepCloneModel(source: THREE.Object3D) {
+  const clone = source.clone(true);
+
+  clone.traverse((child: any) => {
+    if (child.isMesh && child.material) {
+      if (Array.isArray(child.material)) {
+        child.material = child.material.map((m: any) => m.clone());
+      } else {
+        child.material = child.material.clone();
+      }
+    }
+  });
+
+  return clone;
+}
+
 function useModelPool(source: THREE.Object3D, count: number) {
   const pool = useRef<THREE.Object3D[]>([]);
 
   useMemo(() => {
     while (pool.current.length < count) {
-      pool.current.push(source.clone(true));
+      pool.current.push(deepCloneModel(source));
     }
   }, [count, source]);
 
@@ -30,6 +46,57 @@ function useModelPool(source: THREE.Object3D, count: number) {
   }, [count]);
 
   return pool.current;
+}
+
+export async function blobToThreeTexture(blob: Blob): Promise<THREE.Texture> {
+  const bitmap = await createImageBitmap(blob);
+
+  const texture = new THREE.Texture(bitmap);
+  texture.needsUpdate = true;
+
+  return texture;
+}
+
+function usePresentTextures(presents: PresentType[]) {
+  const [textures, setTextures] = useState<Map<string, THREE.Texture>>(
+    new Map(),
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadTextures() {
+      const entries = await Promise.all(
+        presents.map(async (p) => {
+          if (textures.has(p.gifterId)) return null;
+
+          const res = await fetch("/api/texture?id=" + p.gifterId, {
+            method: "GET",
+          });
+          const blob = await res.blob();
+          const tex = await blobToThreeTexture(blob);
+          return [p.gifterId, tex] as const;
+        }),
+      );
+
+      if (cancelled) return;
+
+      setTextures((prev) => {
+        const next = new Map(prev);
+        for (const e of entries) {
+          if (e) next.set(e[0], e[1]);
+        }
+        return next;
+      });
+    }
+
+    loadTextures();
+    return () => {
+      cancelled = true;
+    };
+  }, [presents]);
+
+  return textures;
 }
 
 type ClientGameProps = {
@@ -51,6 +118,7 @@ export default function ClientGame({ player }: ClientGameProps) {
       () => `ws://${window.location.host}/${player.room}/ws`,
       player,
     );
+  const textures = usePresentTextures(presents);
   const models = useModelPool(gltf.scene, presents.length);
   useEffect(() => {
     for (const p of presents) {
@@ -69,37 +137,30 @@ export default function ClientGame({ player }: ClientGameProps) {
       });
   }, [players]);
 
-  if (!isStarted) {
-    return (
-      <Lobby
-        player={player}
-        players={players}
-        startGameAction={() => startGame(player)}
-      />
-    );
-  }
+  const presentElements = useMemo(() => {
+    return presents?.map((present, i) => {
+      if (!claimedPresents.includes(present.gifterId)) {
+        return (
+          <WrappedPresent
+            key={i}
+            isMyTurn={players[turnIndex].id == player.id}
+            playerId={player.id}
+            present={present}
+            onClickAction={() => {
+              takePresent(present.gifterId);
+            }}
+            model={models[i]}
+            texture={textures.get(present.gifterId)}
+            captureScrollAction={setScrollEventPresents}
+          />
+        );
+      }
+    });
+  }, [presents, textures]);
 
   if (claimedPresents.length === presents.length) {
     return <PostGame player={player} players={players} />;
   }
-
-  const presentElements = presents?.map((present, i) => {
-    if (!claimedPresents.includes(present.gifterId)) {
-      return (
-        <WrappedPresent
-          key={i}
-          isMyTurn={players[turnIndex].id == player.id}
-          playerId={player.id}
-          present={present}
-          onClickAction={() => {
-            takePresent(present.gifterId);
-          }}
-          model={models[i]}
-          captureScrollAction={setScrollEventPresents}
-        />
-      );
-    }
-  });
 
   const playerElements = players?.map((presentPlayer, i) => {
     return (
@@ -115,6 +176,16 @@ export default function ClientGame({ player }: ClientGameProps) {
       />
     );
   });
+
+  if (!isStarted) {
+    return (
+      <Lobby
+        player={player}
+        players={players}
+        startGameAction={() => startGame(player)}
+      />
+    );
+  }
 
   return (
     <div className="h-screen w-screen" ref={container}>

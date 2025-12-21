@@ -10,7 +10,7 @@ import { useTexture } from "@react-three/drei";
 type BoosterPackProps = {
   model: any;
   isHovered: boolean;
-  albedo: Blob | THREE.CanvasTexture<HTMLCanvasElement>;
+  albedo: THREE.CanvasTexture<HTMLCanvasElement>;
   extra?: ThreeElements["mesh"];
 };
 
@@ -20,7 +20,7 @@ export default function BoosterPack({
   isHovered,
   albedo,
 }: BoosterPackProps) {
-  const meshRef = useRef<THREE.Mesh>(null!);
+  const meshRef = useRef<THREE.Object3D>(null!);
   const { pointer } = useThree();
   const target = new Vector3();
   const normalMap = useTexture("/wrapped-present/NormalMap.png");
