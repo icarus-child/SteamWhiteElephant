@@ -13,7 +13,6 @@ import BoosterPack from "./BoosterPack";
 import { Environment, View } from "@react-three/drei";
 import { isMobile } from "react-device-detect";
 import { CanvasTexture } from "three";
-import { texture } from "three/tsl";
 
 export type WrappedPresentProps = {
   present: Present;

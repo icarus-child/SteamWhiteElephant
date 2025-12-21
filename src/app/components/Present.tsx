@@ -1,55 +1,14 @@
 "use client";
 
-import { GetSteamLibraryCapsuleURL } from "@/actions/steam";
 import { Player } from "@/types/player";
-import React, {
+import {
   CSSProperties,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import Tilt from "react-parallax-tilt";
-
-function TiltCard({
-  children,
-  url,
-}: {
-  children: React.ReactNode;
-  url: string;
-}) {
-  return (
-    <Tilt
-      className="w-[65%] h-[65%] flex flex-col place-items-center"
-      tiltMaxAngleX={12}
-      tiltMaxAngleY={12}
-      transitionSpeed={500}
-      scale={1}
-      trackOnWindow={false}
-      tiltReverse={true}
-    >
-      <div
-        className={"rounded-3xl size-full relative"}
-        style={{
-          backgroundImage: `
-                  linear-gradient(
-                    #00000000 50%,
-                    #220000 87%,
-                    #440000 100%
-                  ),
-                  url('${url}')
-                `,
-          backgroundSize: "cover, 105%",
-          backgroundPosition: "center, center",
-          backgroundRepeat: "no-repeat, no-repeat",
-          border: "8px solid #440000",
-        }}
-      >
-        {children}
-      </div>
-    </Tilt>
-  );
-}
+import TiltCard from "./TiltCard";
 
 type SelectedPlayerProps = {
   selected: boolean;

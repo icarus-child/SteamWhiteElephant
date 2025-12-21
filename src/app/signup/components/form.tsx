@@ -295,14 +295,6 @@ function MiniSketchPad({ onTextureChange }: MiniSketchPadProps) {
           camera={{ position: [0, 0, -2], scale: [0.013, 0.013, 0.02] }}
           orthographic={true}
         >
-          <mesh>
-            <planeGeometry args={[1, 1]} lookAt={[0, 0, 1]} />
-            <meshStandardMaterial
-              map={texture}
-              transparent
-              depthWrite={false}
-            />
-          </mesh>
           <Environment
             files="/wrapped-present/christmas_photo_studio_01_2k.exr"
             environmentRotation={[0, Math.PI, 0]}

@@ -57,7 +57,9 @@ export async function blobToThreeTexture(blob: Blob): Promise<THREE.Texture> {
   return texture;
 }
 
-function usePresentTextures(presents: PresentType[]) {
+function usePresentTextures(
+  presents: PresentType[],
+): Map<string, THREE.Texture> {
   const [textures, setTextures] = useState<Map<string, THREE.Texture>>(
     new Map(),
   );
@@ -159,7 +161,14 @@ export default function ClientGame({ player }: ClientGameProps) {
   }, [presents, textures]);
 
   if (claimedPresents.length === presents.length) {
-    return <PostGame player={player} players={players} />;
+    return (
+      <PostGame
+        player={player}
+        players={players}
+        models={models}
+        textures={textures}
+      />
+    );
   }
 
   const playerElements = players?.map((presentPlayer, i) => {
