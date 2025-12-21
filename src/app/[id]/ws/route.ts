@@ -15,7 +15,6 @@ let game: Game = {
   turnIndex: 0,
   presents: [],
   roomId: "",
-  gameStarted: false,
 };
 
 function reconcilePlayersWithOrder(
@@ -78,16 +77,12 @@ export async function UPGRADE(
     game.presents,
     await GetRoomPresents(sourcePlayer.room),
   );
-  // console.log(`present texture: ${game.presents[0].texture.size}`);
-  // const url = URL.createObjectURL(game.presents[0].texture);
-  // console.log(url);
-  game.gameStarted = (await IsRoomStarted(game.roomId)) ?? false;
   const join_action = new PlayerAction(
     sourcePlayer.id,
     game.turnOrder,
     game.turnIndex,
     game.presents,
-    game.gameStarted,
+    (await IsRoomStarted(game.roomId)) ?? false,
   );
 
   for (const other of server.clients) {
@@ -132,7 +127,7 @@ export async function UPGRADE(
             game.turnOrder,
             game.turnIndex,
             game.presents,
-            game.gameStarted,
+            (await IsRoomStarted(game.roomId)) ?? false,
           ),
         ),
       );
@@ -183,7 +178,7 @@ export async function UPGRADE(
               game.turnOrder,
               game.turnIndex,
               game.presents,
-              game.gameStarted,
+              (await IsRoomStarted(game.roomId)) ?? false,
             ),
           ),
         );

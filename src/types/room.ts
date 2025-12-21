@@ -6,5 +6,4 @@ export type Game = {
   turnIndex: number;
   presents: Present[];
   roomId: string;
-  gameStarted: boolean;
 };
