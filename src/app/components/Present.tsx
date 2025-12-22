@@ -19,7 +19,7 @@ function SelectedPlayer(props: SelectedPlayerProps) {
   return (
     <>
       <svg
-        className="absolute w-fit top-2 mx-auto"
+        className="absolute w-fit 3xl:top-2 top-1 mx-auto"
         height={8}
         width={12}
         fill="none"
@@ -36,7 +36,7 @@ function SelectedPlayer(props: SelectedPlayerProps) {
         </g>
       </svg>
       <svg
-        className="absolute w-fit top-12 mx-auto"
+        className="absolute w-fit 3xl:top-12 top-9 mx-auto"
         height={8}
         width={12}
         fill="none"
@@ -104,7 +104,7 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
       <SelectedPlayer selected={props.selected ?? false} />
       <div
         className={
-          "text-center font-bold text-xl pt-5 pb-5" +
+          "text-center font-bold 3xl:text-2xl text-md 3xl:pt-[0.7em] pt-[0.9em] pb-5" +
           " " +
           (props.selected ? "text-white" : "text-[#FFDDDD]")
         }
@@ -115,7 +115,7 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
       {props.player.present && imageUrl ? (
         <>
           <h1
-            className="pb-3 pt-2 text-2xl font-black text-[#eeeeee] pointer-events-none font-inter"
+            className="3xl:pb-6 pb-3 3xl:pt-5 pt-2 3xl:text-3xl text-xl font-black text-[#eeeeee] pointer-events-none font-inter"
             style={{ textShadow: "10px 10px 10px #11111199" }}
           >
             {props.player.present.items[0].name}
@@ -123,7 +123,7 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
           <TiltCard url={imageUrl}>
             <a
               href={`https://store.steampowered.com/app/${props.player.present.items[0].gameId}`}
-              className="underline absolute bottom-3 text-center w-full text-[#AACCFF] text-lg"
+              className="underline absolute bottom-3 text-center w-full text-[#AACCFF] 3xl:text-lg text-sm"
               target="_blank"
             >
               steam link
@@ -135,7 +135,7 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
         <button
           onClick={() => props.onClickAction()}
           disabled={isClientsBroughtGift || isFrozen}
-          className="steal-btn mt-5 text-[#FF7B8D] font-black text-3xl rounded-xl disabled:pointer-events-none disabled:text-[#404040] disabled:bg-[#a0a0a0] hover:rounded-b-3xl hover:rounded-t-lg transition-[border-radius] py-2 px-10"
+          className="steal-btn 3xl:mt-7 mt-5 text-[#FF7B8D] font-black 3xl:text-4xl text-2xl rounded-xl disabled:pointer-events-none disabled:text-[#404040] disabled:bg-[#a0a0a0] hover:rounded-b-3xl hover:rounded-t-lg transition-[border-radius] 3xl:py-3 py-2 px-10"
         >
           <span className="steal-text font-fjalla">
             {isFrozen ? "LOCKED" : isClientsBroughtGift ? "YOURS" : "STEAL"}

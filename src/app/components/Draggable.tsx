@@ -260,7 +260,7 @@ export default function Draggable(props: DraggableProps) {
       if (!ref.current) return;
       return (
         <div
-          className="middleline bg-[#946666d0] border-[#CA8888] border-y-8 h-16 shrink-0 absolute top-0 z-10 pointer-events-none shadow-xl shadow-[#401111]/50"
+          className="middleline bg-[#946666d0] border-[#CA8888] 3xl:border-y-8 border-y-[5px] 3xl:h-16 h-[3em] shrink-0 absolute top-0 z-10 pointer-events-none shadow-xl shadow-[#401111]/50"
           style={{ width: refWidth }}
         ></div>
       );

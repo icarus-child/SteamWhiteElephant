@@ -39,8 +39,8 @@ export async function signup(inputs: Inputs): Promise<string[]> {
     errors.push("Custom Name not found");
   } else if (giftName == "") {
     errors.push("Custom Name cannot be empty");
-  } else if (giftName.length > 20) {
-    errors.push("Custom Name cannot be longer than 20 characters");
+  } else if (giftName.length > 25) {
+    errors.push("Custom Name cannot be longer than 25 characters");
   }
 
   if (texture == null) {

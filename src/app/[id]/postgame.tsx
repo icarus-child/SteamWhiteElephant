@@ -39,7 +39,7 @@ const FinalPresent = ({
         <TiltCard url={imageUrl ?? ""} height="h-[22em]" width="w-[15em]">
           <a
             href={`https://store.steampowered.com/app/${player.present?.items[0].gameId}`}
-            className="underline absolute bottom-3 text-center w-full text-[#AACCFF] text-lg"
+            className="underline absolute bottom-3 text-center w-full text-[#AACCFF] 3xl:text-lg text-sm"
             target="_blank"
           >
             steam link

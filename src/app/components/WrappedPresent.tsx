@@ -72,7 +72,7 @@ export default function WrappedPresent(props: WrappedPresentProps) {
     >
       {/* 20 character maximum */}
       <h1
-        className="place-self-center text-white font-inter font-bold text-xl mt-5 text-center max-w-[100%]"
+        className="place-self-center text-white font-inter font-bold text-md 3xl:text-2xl mt-5 text-center max-w-[100%]"
         style={{ textShadow: "10px 10px 10px #11111199" }}
       >
         {props.present.giftName}
@@ -90,7 +90,7 @@ export default function WrappedPresent(props: WrappedPresentProps) {
       </View>
       {(isHovered || isMobile) && props.isMyTurn ? (
         <button
-          className={`font-fjalla text-2xl absolute bg-white text-[#FF7B8D] active:bg-[#AF5B6D] hover:text-white hover:bg-[#FF7B8D] disabled:text-[#404040] disabled:bg-[#a0a0a0] p-2 rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 ${props.present.gifterId === props.playerId ? " cursor-not-allowed" : ""}`}
+          className={`font-fjalla 3xl:text-2xl text-lg absolute bg-white text-[#FF7B8D] active:bg-[#AF5B6D] hover:text-white hover:bg-[#FF7B8D] disabled:text-[#404040] disabled:bg-[#a0a0a0] 3xl:p-2 px-2 py-1 rounded-lg top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 ${props.present.gifterId === props.playerId ? " cursor-not-allowed" : ""}`}
           onClick={() => props.onClickAction()}
           disabled={props.present.gifterId === props.playerId}
         >
@@ -103,7 +103,7 @@ export default function WrappedPresent(props: WrappedPresentProps) {
             return (
               <p
                 key={i}
-                className="w-fit px-2 rounded-xl text-white bg-black/70 font-inter font-bold"
+                className="w-fit px-2 rounded-xl text-white bg-black/70 font-inter font-bold 3xl:text-lg text-sm"
               >
                 {tag}
               </p>

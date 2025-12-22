@@ -8,6 +8,9 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        "3xl": "2000px",
+      },
       colors: {
         primary: "var(--color-primary)",
         secondary: "var(--color-secondary)",

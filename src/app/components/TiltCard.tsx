@@ -22,7 +22,7 @@ export default function TiltCard({
       tiltReverse={true}
     >
       <div
-        className={"rounded-3xl size-full relative"}
+        className={"3xl:rounded-3xl rounded-2xl size-full relative"}
         style={{
           backgroundImage: `
                   linear-gradient(
@@ -35,7 +35,7 @@ export default function TiltCard({
           backgroundSize: "cover, 105%",
           backgroundPosition: "center, center",
           backgroundRepeat: "no-repeat, no-repeat",
-          border: "8px solid #440000",
+          border: "6px solid #440000",
         }}
       >
         {children}

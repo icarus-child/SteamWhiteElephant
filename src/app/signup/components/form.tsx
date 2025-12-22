@@ -176,8 +176,8 @@ export default function Form() {
           Wrapping Paper
         </h2>
         <p className="text-white font-inter">
-          Everything below can be seen on your wrapped present. <br />
-          Give a hint for your game, or completely mislead them ;)
+          Everything below can be seen while your present is wrapped. <br />
+          Give others a hint for your game, or completely mislead them ;)
         </p>
       </div>
       <div className="flex flex-row w-full h-[30em] mb-[10em]">

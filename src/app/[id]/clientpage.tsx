@@ -211,7 +211,7 @@ export default function ClientGame({ player }: ClientGameProps) {
         {playerElements}
       </Draggable>
       <WebGLBackground
-        outer={{ r: 0.761, g: 0.396, b: 0.443, a: 1.0 }}
+        outer={{ r: 0.761, g: 0.396, b: 0.443, a: 1 }}
         middle={{ r: 0.361, g: 0.188, b: 0.212, a: 1.0 }}
         inner={{ r: 0.561, g: 0.29, b: 0.325, a: 1.0 }}
       />
