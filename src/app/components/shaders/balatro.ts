@@ -13,6 +13,9 @@ precision highp float;
 
 uniform vec2 uResolution;
 uniform float uTime;
+uniform vec4 outerColor;
+uniform vec4 middleColor;
+uniform vec4 innerColor;
 
 out vec4 outColor;
 
@@ -20,9 +23,6 @@ out vec4 outColor;
 #define SPIN_ROTATION 0.05
 #define SPIN_SPEED 2.0
 #define OFFSET vec2(0.0)
-#define COLOUR_1 vec4(0.761,0.396,0.443, 1.0) // outer
-#define COLOUR_2 vec4(0.561,0.29,0.325, 1.0) // inner
-#define COLOUR_3 vec4(0.361,0.188,0.212, 1.0) // middle
 #define CONTRAST 3.5
 #define LIGTHING 0.4
 #define SPIN_AMOUNT 0.25
@@ -89,11 +89,11 @@ vec4 effect(vec2 screenSize, vec2 screen_coords) {
       + LIGTHING * max(c2p * 5.0 - 4.0, 0.0);
 
     return
-        (0.3 / CONTRAST) * COLOUR_1
+        (0.3 / CONTRAST) * outerColor
       + (1.0 - 0.3 / CONTRAST) *
-        (COLOUR_1 * c1p
-        + COLOUR_2 * c2p
-        + vec4(c3p * COLOUR_3.rgb, c3p * COLOUR_1.a))
+        (outerColor * c1p
+        + innerColor * c2p
+        + vec4(c3p * middleColor.rgb, c3p * outerColor.a))
       + light;
 }
 

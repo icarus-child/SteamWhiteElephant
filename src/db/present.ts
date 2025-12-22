@@ -4,7 +4,7 @@ import { dburl } from "@/constants";
 import { Present } from "@/types/present";
 
 export async function CreatePresent(
-  present: Present,
+  present: Present & { texture: Blob },
   playerId: string,
 ): Promise<boolean> {
   const res_tex = await fetch(dburl + "texture/", {
@@ -28,6 +28,7 @@ export async function CreatePresent(
     body: JSON.stringify({
       gifterId: playerId,
       items: present.items,
+      giftName: present.giftName,
     }),
   });
   if (res_pres.status != 200) {
@@ -58,16 +59,11 @@ export async function GetRoomPresents(id: string): Promise<Present[]> {
   }
   return await Promise.all(
     json.presents.map(async (p): Promise<Present> => {
-      // const res = await fetch(dburl + "texture?id=" + p.gifterId, {
-      //   method: "GET",
-      // });
-      // const blob = await res.blob();
       return {
         ...p,
         timesTraded: 0,
         maxTags: Math.min(Math.min(...p.items.map((i) => i.tags.length)), 4),
-        // texture: blob,
-        texture: undefined,
+        giftName: p.giftName,
       };
     }),
   );

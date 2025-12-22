@@ -7,6 +7,7 @@ import Button from "@/app/components/Button";
 import { RoomExists } from "@/db/room";
 import Input from "@/app/components/Input";
 import MiniSketchPad from "./MiniSketchPad";
+import WebGLBackground from "@/app/components/WebGLBackground";
 
 function Errors(errors: string[]): JSX.Element[] {
   const rows = [];
@@ -24,6 +25,7 @@ export type Inputs = {
   name: string | null;
   room: string | null;
   games: string[];
+  giftName: string | null;
   texture: Blob | null;
 };
 
@@ -32,6 +34,7 @@ export default function Form() {
     name: null,
     room: "game",
     games: [],
+    giftName: null,
     texture: null,
   });
   const [pending, setPending] = useState<boolean>(false);
@@ -89,6 +92,10 @@ export default function Form() {
     checkRoomAvailability(event.target.value);
   };
 
+  const handleGiftNameChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    handleChange(event);
+  };
+
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const name = event.target.name;
     const value = event.target.value;
@@ -101,7 +108,7 @@ export default function Form() {
       className="px-20 w-full max-w-[80em]"
       onSubmit={handleSubmit}
     >
-      <div className="flex lg:flex-row lg:gap-5 gap-10 lg:place-items-start place-items-center flex-col min-h-[18em]">
+      <div className="flex lg:flex-row lg:gap-5 gap-10 lg:place-items-start place-items-center flex-col">
         <div className="w-[30em] flex flex-col place-items-center">
           <h2 className="font-inknut font-semibold text-3xl text-white pb-1">
             New Gifter
@@ -139,8 +146,8 @@ export default function Form() {
             </div>
           </div>
         </div>
-        <div className="grow" />
-        <div className="w-[30em] flex flex-col place-items-center justify-items-end">
+        <div className="grow hidden lg:block" />
+        <div className="w-[30em] flex flex-col place-items-center">
           <h2 className="font-inknut font-semibold text-3xl text-white pb-1">
             Steam Gift
           </h2>
@@ -164,16 +171,28 @@ export default function Form() {
           </span>
         </div>
       </div>
-      <h2 className="font-inknut font-semibold text-3xl text-white pb-10">
-        Wrapping Paper
-      </h2>
-      <div className="flex flex-row w-full h-[30em]">
+      <div className="flex flex-col mt-10 pb-10 gap-2">
+        <h2 className="font-inknut font-semibold text-3xl text-white">
+          Wrapping Paper
+        </h2>
+        <p className="text-white font-inter">
+          Everything below can be seen on your wrapped present. <br />
+          Give a hint for your game, or completely mislead them ;)
+        </p>
+      </div>
+      <div className="flex flex-row w-full h-[30em] mb-[10em]">
         <MiniSketchPad
           onTextureChange={(b: Blob) => {
             setInputs({ ...inputs, ["texture"]: b });
           }}
+          onGiftNameChange={handleGiftNameChange}
         />
       </div>
+      <WebGLBackground
+        outer={{ r: 0.761, g: 0.396, b: 0.443, a: 1.0 }}
+        middle={{ r: 0.361, g: 0.188, b: 0.212, a: 1.0 }}
+        inner={{ r: 0.561, g: 0.29, b: 0.325, a: 1.0 }}
+      />
     </form>
   );
 }

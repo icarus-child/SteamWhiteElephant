@@ -3,7 +3,24 @@
 import { useEffect, useRef } from "react";
 import { fragmentShader, vertexShader } from "./shaders/balatro";
 
-export default function WebGLBackground() {
+export type Color4 = {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+};
+
+type WebGLBackgroundProps = {
+  outer: Color4;
+  middle: Color4;
+  inner: Color4;
+};
+
+export default function WebGLBackground({
+  outer,
+  middle,
+  inner,
+}: WebGLBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -79,6 +96,9 @@ export default function WebGLBackground() {
 
     const timeLoc = gl.getUniformLocation(program, "uTime");
     const resLoc = gl.getUniformLocation(program, "uResolution");
+    const outerLoc = gl.getUniformLocation(program, "outerColor");
+    const middleLoc = gl.getUniformLocation(program, "middleColor");
+    const innerLoc = gl.getUniformLocation(program, "innerColor");
 
     // ---- Animation loop ----
     let running = true;
@@ -89,6 +109,9 @@ export default function WebGLBackground() {
 
       gl.uniform1f(timeLoc, (now - startTime) * 0.001);
       gl.uniform2f(resLoc, canvas.width, canvas.height);
+      gl.uniform4f(outerLoc, outer.r, outer.g, outer.b, outer.a);
+      gl.uniform4f(middleLoc, middle.r, middle.g, middle.b, middle.a);
+      gl.uniform4f(innerLoc, inner.r, inner.g, inner.b, inner.a);
 
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       requestAnimationFrame(loop);

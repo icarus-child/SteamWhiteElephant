@@ -1,20 +1,26 @@
 import * as THREE from "three";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Environment, useGLTF } from "@react-three/drei";
 import { ReactSketchCanvas, ReactSketchCanvasRef } from "react-sketch-canvas";
 import { isFirefox } from "react-device-detect";
 import { Canvas } from "@react-three/fiber";
 import BoosterPack from "@/app/components/BoosterPack";
+import Input from "@/app/components/Input";
 
 type MiniSketchPadProps = {
   onTextureChange: (blob: Blob) => void;
+  onGiftNameChange: (event: ChangeEvent<HTMLInputElement>) => void;
 };
 
-export default function MiniSketchPad({ onTextureChange }: MiniSketchPadProps) {
-  const canvasRef = useRef<ReactSketchCanvasRef>(null);
+export default function MiniSketchPad({
+  onTextureChange,
+  onGiftNameChange,
+}: MiniSketchPadProps) {
+  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [giftName, setGiftName] = useState<string>("Custom Name");
   const [color, setColor] = useState("#6699ff");
   const [mode, setMode] = useState<"pen" | "eraser">("pen");
-  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const canvasRef = useRef<ReactSketchCanvasRef>(null);
   const backgroundImageRef = useRef<HTMLImageElement | null>(null);
   const foregroundImageRef = useRef<HTMLImageElement | null>(null);
   const rasterCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -136,6 +142,11 @@ export default function MiniSketchPad({ onTextureChange }: MiniSketchPadProps) {
     img.src = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
   }
 
+  function handleGiftNameChange(event: ChangeEvent<HTMLInputElement>) {
+    onGiftNameChange(event);
+    setGiftName(event.target.value);
+  }
+
   return (
     <>
       <div className="flex flex-col gap-2 w-fit">
@@ -254,14 +265,29 @@ export default function MiniSketchPad({ onTextureChange }: MiniSketchPadProps) {
           onChange={() => syncSketchToTexture()}
         />
       </div>
+      <Input
+        id="gift-name"
+        name="giftName"
+        type="text"
+        placeholder="Custom Name"
+        onChange={handleGiftNameChange}
+        form="text"
+        className="max-w-[20em] h-fit ml-10"
+      />
       <div className="grow" />
       <div
         className="h-full w-80"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
+        <h1
+          className="place-self-center text-white font-inter font-bold text-xl mt-5 text-center"
+          style={{ textShadow: "10px 10px 10px #11111144" }}
+        >
+          {giftName.length ? giftName : "Custom Name"}
+        </h1>
         <Canvas
-          camera={{ position: [0, 0, -2], scale: [0.013, 0.013, 0.02] }}
+          camera={{ position: [0, 0, -2], scale: [0.011, 0.011, 0.02] }}
           orthographic={true}
         >
           <Environment

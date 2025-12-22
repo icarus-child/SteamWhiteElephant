@@ -20,7 +20,7 @@ async function checkForSession() {
 export default async function Signup() {
   await checkForSession();
   return (
-    <div className="flex flex-col w-full h-screen place-items-center bg-[#4B744C]">
+    <div className="flex flex-col w-full h-screen place-items-center">
       <h1 className="font-flavors text-4xl md:text-6xl lg:text-8xl text-white my-20">
         Steam White Elephant
       </h1>

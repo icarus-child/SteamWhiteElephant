@@ -14,6 +14,7 @@ export async function signup(inputs: Inputs): Promise<string[]> {
   const nameRaw = inputs.name;
   const roomRaw = inputs.room;
   const gameIdsRaw = inputs.games;
+  const giftName = inputs.giftName;
   const texture = inputs.texture;
 
   const errors: string[] = [];
@@ -32,6 +33,14 @@ export async function signup(inputs: Inputs): Promise<string[]> {
     errors.push("Room ID not found");
   } else if (roomRaw == "") {
     errors.push("Room ID cannot be empty");
+  }
+
+  if (giftName == null) {
+    errors.push("Custom Name not found");
+  } else if (giftName == "") {
+    errors.push("Custom Name cannot be empty");
+  } else if (giftName.length > 20) {
+    errors.push("Custom Name cannot be longer than 20 characters");
   }
 
   if (texture == null) {
@@ -86,12 +95,13 @@ export async function signup(inputs: Inputs): Promise<string[]> {
       tags: game.tags,
     };
   });
-  const present: Present = {
+  const present: Present & { texture: Blob } = {
     gifterId: player.id,
     items: parsedItems,
     timesTraded: 0,
     maxTags: Math.min(Math.min(...parsedItems.map((i) => i.tags.length)), 4),
     texture: texture as Blob,
+    giftName: giftName as string,
   };
 
   const okPresent = await createPresent(present, playerId);
@@ -119,7 +129,7 @@ async function createPlayer(player: PartialRoomPlayer): Promise<{
 }
 
 export async function createPresent(
-  present: Present,
+  present: Present & { texture: Blob },
   playerId: string,
 ): Promise<boolean> {
   return await CreatePresent(present, playerId);

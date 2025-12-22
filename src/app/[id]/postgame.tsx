@@ -31,6 +31,8 @@ const FinalPresent = ({
   }, [player.present?.items[0].gameId]);
   const [isHovered, setIsHovered] = useState<boolean>(false);
 
+  model.scale.setScalar(1);
+
   return (
     <div className="flex flex-col w-fit gap-8">
       <div className="flex flex-row">
@@ -112,7 +114,11 @@ export default function PostGame({
               key={i}
             />
           ))}
-          <WebGLBackground />
+          <WebGLBackground
+            outer={{ r: 0.761, g: 0.396, b: 0.443, a: 1.0 }}
+            middle={{ r: 0.361, g: 0.188, b: 0.212, a: 1.0 }}
+            inner={{ r: 0.561, g: 0.29, b: 0.325, a: 1.0 }}
+          />
         </div>
       </div>
     </>
