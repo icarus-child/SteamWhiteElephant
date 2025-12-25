@@ -10,7 +10,7 @@ import { useTexture } from "@react-three/drei";
 type BoosterPackProps = {
   model: any;
   isHovered: boolean;
-  albedo: THREE.CanvasTexture<HTMLCanvasElement>;
+  albedo: THREE.CanvasTexture<HTMLCanvasElement> | null;
   extra?: ThreeElements["mesh"];
 };
 

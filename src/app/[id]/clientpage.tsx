@@ -52,6 +52,7 @@ export async function blobToThreeTexture(blob: Blob): Promise<THREE.Texture> {
   const bitmap = await createImageBitmap(blob);
 
   const texture = new THREE.Texture(bitmap);
+  texture.colorSpace = THREE.SRGBColorSpace;
   texture.needsUpdate = true;
 
   return texture;

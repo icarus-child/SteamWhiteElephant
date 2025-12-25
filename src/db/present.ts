@@ -68,33 +68,3 @@ export async function GetRoomPresents(id: string): Promise<Present[]> {
     }),
   );
 }
-
-type JsonPresent = Present & {
-  error: string;
-};
-
-export async function GetPlayerPresent(
-  pid: string,
-): Promise<Present | undefined> {
-  const response = await fetch(dburl + "present?id=" + pid, {
-    method: "GET",
-  });
-  let json: JsonPresent;
-  try {
-    json = await response.json();
-  } catch (error) {
-    console.error(error);
-    return undefined;
-  }
-  if (json.error != null) {
-    console.error(json.error);
-    return undefined;
-  }
-  return {
-    gifterId: json.gifterId,
-    items: json.items,
-    timesTraded: 0,
-    maxTags: Math.min(Math.min(...json.items.map((i) => i.tags.length)), 4),
-    texture: json.texture,
-  };
-}

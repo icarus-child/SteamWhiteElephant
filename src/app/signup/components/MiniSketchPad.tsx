@@ -16,6 +16,7 @@ export default function MiniSketchPad({
   onTextureChange,
   onGiftNameChange,
 }: MiniSketchPadProps) {
+  const [selectedWrap, setSelectedWrap] = useState<number>(0);
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const [giftName, setGiftName] = useState<string>("Custom Name");
   const [color, setColor] = useState("#6699ff");
@@ -26,12 +27,48 @@ export default function MiniSketchPad({
   const rasterCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const textureRef = useRef<THREE.CanvasTexture | null>(null);
 
+  const wraps: WrappingPaper[] = [
+    { name: "Scuffed", color: "#A4CFC6" },
+    { name: "Retro", color: "#795493" },
+    { name: "Pixel", color: "#243A5E" },
+    { name: "Artdeco", color: "#F5F3EA" },
+  ];
+
+  function handleGiftNameChange(event: ChangeEvent<HTMLInputElement>) {
+    onGiftNameChange(event);
+    setGiftName(event.target.value);
+  }
+
+  type WrappingPaper = {
+    name: string;
+    color: string;
+  };
+
+  function WrappingButton({
+    color,
+    selected,
+    index,
+  }: {
+    color: string;
+    selected: boolean;
+    index: number;
+  }) {
+    return (
+      <button
+        className={`w-10 aspect-square  rounded-lg ${selected ? "border-4 border-white" : ""}`}
+        style={{ backgroundColor: color }}
+        type="button"
+        onClick={() => setSelectedWrap(index)}
+      />
+    );
+  }
+
   useEffect(() => {
     const bgImg = new window.Image();
-    bgImg.src = "/wrapped-present/AlbedoBackground.png";
+    bgImg.src = `/wrapped-present/${wraps[selectedWrap].name}_Albedo_Background.png`;
 
     const fgImg = new window.Image();
-    fgImg.src = "/wrapped-present/AlbedoForeground.png";
+    fgImg.src = `/wrapped-present/${wraps[selectedWrap].name}_Albedo_Foreground.png`;
 
     bgImg.onload = () => {
       backgroundImageRef.current = bgImg;
@@ -42,7 +79,7 @@ export default function MiniSketchPad({
       foregroundImageRef.current = fgImg;
       syncSketchToTexture();
     };
-  }, []);
+  }, [selectedWrap]);
 
   useEffect(() => {
     const c = document.createElement("canvas");
@@ -140,11 +177,6 @@ export default function MiniSketchPad({
     };
 
     img.src = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-  }
-
-  function handleGiftNameChange(event: ChangeEvent<HTMLInputElement>) {
-    onGiftNameChange(event);
-    setGiftName(event.target.value);
   }
 
   return (
@@ -265,15 +297,29 @@ export default function MiniSketchPad({
           onChange={() => syncSketchToTexture()}
         />
       </div>
-      <Input
-        id="gift-name"
-        name="giftName"
-        type="text"
-        placeholder="Custom Name"
-        onChange={handleGiftNameChange}
-        form="text"
-        className="max-w-[20em] h-fit ml-10"
-      />
+      <div className="max-w-[20em] ml-10 w-full">
+        <Input
+          id="gift-name"
+          name="giftName"
+          type="text"
+          placeholder="Custom Name"
+          onChange={handleGiftNameChange}
+          form="text"
+          className="h-fit"
+        />
+        <div className="flex flex-row p-5 gap-3">
+          {wraps.map((w, i) => {
+            return (
+              <WrappingButton
+                color={w.color}
+                key={i}
+                index={i}
+                selected={selectedWrap === i}
+              />
+            );
+          })}
+        </div>
+      </div>
       <div className="grow" />
       <div
         className="h-full w-80"
