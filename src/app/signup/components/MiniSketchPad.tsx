@@ -26,6 +26,7 @@ export default function MiniSketchPad({
   const foregroundImageRef = useRef<HTMLImageElement | null>(null);
   const rasterCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const textureRef = useRef<THREE.CanvasTexture | null>(null);
+  const syncVersionRef = useRef(0);
 
   const wraps: WrappingPaper[] = [
     { name: "Scuffed", color: "#A4CFC6" },
@@ -117,13 +118,16 @@ export default function MiniSketchPad({
   }, []);
 
   async function syncSketchToTexture() {
+    const version = ++syncVersionRef.current;
     if (!canvasRef.current || !rasterCanvasRef.current) return;
 
     const svg = await canvasRef.current.exportSvg();
-    const ctx = rasterCanvasRef.current.getContext("2d")!;
+    if (version !== syncVersionRef.current) return;
 
+    const ctx = rasterCanvasRef.current.getContext("2d")!;
     const img = new Image();
     img.onload = () => {
+      if (version !== syncVersionRef.current) return;
       if (
         !backgroundImageRef.current ||
         !foregroundImageRef.current ||
@@ -172,7 +176,7 @@ export default function MiniSketchPad({
       textureRef.current.needsUpdate = true;
 
       rasterCanvasRef.current?.toBlob((blob: any) => {
-        if (blob) onTextureChange(blob);
+        if (blob && version === syncVersionRef.current) onTextureChange(blob);
       }, "image/png");
     };
 

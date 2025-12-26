@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import TiltCard from "./TiltCard";
+import { Present as PresentType } from "@/types/present";
 
 type SelectedPlayerProps = {
   selected: boolean;
@@ -59,6 +60,7 @@ function SelectedPlayer(props: SelectedPlayerProps) {
 
 export type PresentPlaceholderProps = {
   player: Player;
+  presentReference: PresentType | undefined;
   localPlayer: Player;
   isMyTurn: boolean;
   className?: string;
@@ -116,9 +118,12 @@ export default function Present(props: PresentPlaceholderProps) {
     };
   }, [props.player.present]);
 
+  console.log(
+    `${props.player.present?.giftName} timesTraded: ${props.presentReference?.timesTraded} - maxTags: ${props.presentReference?.maxTags}`,
+  );
   const isFrozen =
-    (props.player.present?.timesTraded ?? 0) >=
-    (props.player.present?.maxTags ?? 0) + 1;
+    (props.presentReference?.timesTraded ?? 0) >=
+    (props.presentReference?.maxTags ?? 0) + 1;
   const isClientsBroughtGift =
     props.localPlayer.id === props.player.present?.gifterId;
   return (
@@ -165,7 +170,7 @@ export default function Present(props: PresentPlaceholderProps) {
         >
           <span className="steal-text font-fjalla">
             {isFrozen
-              ? "LOCKED"
+              ? "FROZEN"
               : stolenThisRound
                 ? "STOLEN"
                 : isClientsBroughtGift

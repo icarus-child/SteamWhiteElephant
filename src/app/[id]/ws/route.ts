@@ -117,14 +117,17 @@ export async function UPGRADE(
       console.error("client attempted to take their own present");
       return;
     }
-    const targetPresent = game.presents.find(
-      (present) => present.gifterId === parsedMessage.gifterId,
+    const targetPresentIndex = game.presents.findIndex(
+      (present: any) => present.gifterId === parsedMessage.gifterId,
     );
-    if (targetPresent === undefined) {
+    if (game.presents[targetPresentIndex] === undefined) {
       console.error("client attempted to take present that doesn't exist");
       return;
     }
-    if (targetPresent.timesTraded >= targetPresent.maxTags + 1) {
+    if (
+      game.presents[targetPresentIndex].timesTraded >=
+      game.presents[targetPresentIndex].maxTags + 1
+    ) {
       console.error("client attempted to take frozen present");
       return;
     }
@@ -137,7 +140,11 @@ export async function UPGRADE(
       );
       return;
     }
-    if (await GetPresentStolenThisRound(targetPresent.gifterId)) {
+    if (
+      await GetPresentStolenThisRound(
+        game.presents[targetPresentIndex].gifterId,
+      )
+    ) {
       console.error(
         "client attempted to take present that was already stolen this round",
       );
@@ -145,11 +152,15 @@ export async function UPGRADE(
     }
 
     const previousOwner = turnOrder.findIndex(
-      (player) => player.present?.gifterId === targetPresent.gifterId,
+      (player) =>
+        player.present?.gifterId === game.presents[targetPresentIndex].gifterId,
     );
 
-    await TakeOrStealPresent(turnOrder[playerIndex].id, targetPresent.gifterId);
-    targetPresent.timesTraded += 1;
+    await TakeOrStealPresent(
+      turnOrder[playerIndex].id,
+      game.presents[targetPresentIndex].gifterId,
+    );
+    game.presents[targetPresentIndex].timesTraded += 1;
 
     if (previousOwner === -1) {
       let tempIndex = (await GetOrderedRoomPlayers(game.roomId)).findIndex(
@@ -163,11 +174,19 @@ export async function UPGRADE(
       await SetRoomTurnIndex(game.roomId, previousOwner);
     }
 
-    if (previousOwner === -1) {
-      await ResetRound(game.roomId);
-    } else {
-      await MarkPresentStolen(targetPresent.gifterId);
+    await ResetRound(game.roomId);
+    if (previousOwner !== -1) {
+      await MarkPresentStolen(game.presents[targetPresentIndex].gifterId);
     }
+
+    console.log(
+      "target:",
+      game.presents[targetPresentIndex].timesTraded,
+      "sent:",
+      game.presents.find(
+        (p: any) => p.gifterId === game.presents[targetPresentIndex].gifterId,
+      )?.timesTraded,
+    );
 
     const players = await GetOrderedRoomPlayers(game.roomId);
     const indexNew = await GetRoomTurnIndex(game.roomId);

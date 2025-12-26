@@ -166,6 +166,9 @@ export default function ClientGame({ player }: ClientGameProps) {
       return (
         <Present
           player={presentPlayer}
+          presentReference={presents.find((pres) => {
+            return pres.gifterId == presentPlayer.present?.gifterId;
+          })}
           localPlayer={player}
           isMyTurn={players[turnIndex].id == player.id}
           selected={i == turnIndex}
@@ -176,7 +179,7 @@ export default function ClientGame({ player }: ClientGameProps) {
         />
       );
     });
-  }, [players]);
+  }, [players, presents]);
 
   if (claimedPresents.length === presents.length) {
     return (

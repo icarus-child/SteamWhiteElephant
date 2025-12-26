@@ -100,7 +100,7 @@ export default function PostGame({
         Thanks for Playing!
       </h1>
       <div className="grid place-content-center">
-        <div className="flex flex-wrap gap-10 mx-10 mt-10">
+        <div className="flex flex-wrap gap-10 mx-10 mt-10 place-content-center">
           {players.map((p, i) => (
             <FinalPresent
               model={models[i]}
