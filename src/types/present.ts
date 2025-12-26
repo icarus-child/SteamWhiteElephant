@@ -2,7 +2,7 @@ export type Present = {
   gifterId: string;
   items: Item[];
   timesTraded: number;
-  maxTags: number;
+  maxSteals: number;
   giftName: string;
 };
 

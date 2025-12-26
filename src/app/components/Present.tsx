@@ -119,11 +119,11 @@ export default function Present(props: PresentPlaceholderProps) {
   }, [props.player.present]);
 
   console.log(
-    `${props.player.present?.giftName} timesTraded: ${props.presentReference?.timesTraded} - maxTags: ${props.presentReference?.maxTags}`,
+    `${props.player.present?.giftName} timesTraded: ${props.presentReference?.timesTraded} - maxTags: ${props.presentReference?.maxSteals}`,
   );
   const isFrozen =
     (props.presentReference?.timesTraded ?? 0) >=
-    (props.presentReference?.maxTags ?? 0) + 1;
+    (props.presentReference?.maxSteals ?? 0) + 1;
   const isClientsBroughtGift =
     props.localPlayer.id === props.player.present?.gifterId;
   return (

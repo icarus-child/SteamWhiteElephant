@@ -63,10 +63,7 @@ export async function GetPlayerPresent(id: string): Promise<Present | null> {
   return {
     ...json.present,
     timesTraded: 0,
-    maxTags: Math.min(
-      Math.min(...json.present.items.map((i) => i.tags.length)),
-      maxSteals,
-    ),
+    maxSteals: maxSteals,
     giftName: json.present.giftName,
   };
 }
@@ -96,10 +93,7 @@ export async function GetRoomPresents(id: string): Promise<Present[]> {
       return {
         ...p,
         timesTraded: 0,
-        maxTags: Math.min(
-          Math.min(...p.items.map((i) => i.tags.length)),
-          maxSteals,
-        ),
+        maxSteals: maxSteals,
         giftName: p.giftName,
       };
     }),

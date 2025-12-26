@@ -126,7 +126,7 @@ export async function UPGRADE(
     }
     if (
       game.presents[targetPresentIndex].timesTraded >=
-      game.presents[targetPresentIndex].maxTags + 1
+      game.presents[targetPresentIndex].maxSteals + 1
     ) {
       console.error("client attempted to take frozen present");
       return;

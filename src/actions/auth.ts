@@ -100,10 +100,7 @@ export async function signup(inputs: Inputs): Promise<string[]> {
     gifterId: player.id,
     items: parsedItems,
     timesTraded: 0,
-    maxTags: Math.min(
-      Math.min(...parsedItems.map((i) => i.tags.length)),
-      maxSteals,
-    ),
+    maxSteals: maxSteals,
     texture: texture as Blob,
     giftName: giftName as string,
   };
