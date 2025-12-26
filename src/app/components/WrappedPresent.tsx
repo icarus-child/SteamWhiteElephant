@@ -72,7 +72,7 @@ export default function WrappedPresent(props: WrappedPresentProps) {
     >
       {/* 20 character maximum */}
       <h1
-        className="place-self-center text-white font-inter font-bold text-md 3xl:text-2xl mt-5 text-center max-w-[100%]"
+        className="pointer-events-none place-self-center text-white font-inter font-bold text-md 3xl:text-2xl mt-5 text-center max-w-[100%]"
         style={{ textShadow: "10px 10px 10px #11111199" }}
       >
         {props.present.giftName}

@@ -161,6 +161,23 @@ export default function ClientGame({ player }: ClientGameProps) {
     });
   }, [presents, textures]);
 
+  const playerElements = useMemo(() => {
+    return players?.map((presentPlayer, i) => {
+      return (
+        <Present
+          player={presentPlayer}
+          localPlayer={player}
+          isMyTurn={players[turnIndex].id == player.id}
+          selected={i == turnIndex}
+          key={i}
+          onClickAction={() =>
+            takePresent((presentPlayer.present as PresentType).gifterId)
+          }
+        />
+      );
+    });
+  }, [players]);
+
   if (claimedPresents.length === presents.length) {
     return (
       <PostGame
@@ -171,21 +188,6 @@ export default function ClientGame({ player }: ClientGameProps) {
       />
     );
   }
-
-  const playerElements = players?.map((presentPlayer, i) => {
-    return (
-      <Present
-        player={presentPlayer}
-        localPlayer={player}
-        isMyTurn={players[turnIndex].id == player.id}
-        selected={i == turnIndex}
-        key={i}
-        onClickAction={() =>
-          takePresent((presentPlayer.present as PresentType).gifterId)
-        }
-      />
-    );
-  });
 
   if (!isStarted) {
     return (

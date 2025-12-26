@@ -3,28 +3,27 @@
 import "server-only";
 import { PlayerAction, SendTakeAction } from "@/actions/player_actions";
 import { Game } from "@/types/room";
-import { GetRoomPresents } from "@/db/present";
+import {
+  GetPresentStolenThisRound,
+  GetRoomPresents,
+  MarkPresentStolen,
+  ResetRound,
+} from "@/db/present";
 import { getPlayerWrapper } from "@/actions/fetch_player";
-import { Player } from "@/types/player";
-import { GetRoomPlayers } from "@/db/players";
+import { GetOrderedRoomPlayers, TakeOrStealPresent } from "@/db/players";
 import { Present } from "@/types/present";
-import { IsRoomStarted, StartRoom } from "@/db/room";
+import {
+  GetRoomTurnIndex,
+  IsRoomStarted,
+  RandomizePlayerOrder,
+  SetRoomTurnIndex,
+  StartRoom,
+} from "@/db/room";
 
 let game: Game = {
-  turnOrder: [],
-  turnIndex: 0,
   presents: [],
   roomId: "",
 };
-
-function reconcilePlayersWithOrder(
-  existingOrder: Player[],
-  dbPlayers: Player[],
-): Player[] {
-  const existingIds = new Set(existingOrder.map((p) => p.id));
-  const missingPlayers = dbPlayers.filter((p) => !existingIds.has(p.id));
-  return [...existingOrder, ...missingPlayers];
-}
 
 function reconcilePresents(
   existingPresents: Present[],
@@ -35,18 +34,6 @@ function reconcilePresents(
     (p) => !existingIds.has(p.gifterId),
   );
   return [...existingPresents, ...missingPresents];
-}
-
-function shuffle(array: Array<any>) {
-  let currentIndex = array.length;
-  while (currentIndex != 0) {
-    let randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-    [array[currentIndex], array[randomIndex]] = [
-      array[randomIndex],
-      array[currentIndex],
-    ];
-  }
 }
 
 export async function GET() {
@@ -69,18 +56,14 @@ export async function UPGRADE(
 
   // on connection
   // tell clients to update players and presents
-  game.turnOrder = reconcilePlayersWithOrder(
-    game.turnOrder,
-    await GetRoomPlayers(sourcePlayer.room),
-  );
   game.presents = reconcilePresents(
     game.presents,
     await GetRoomPresents(sourcePlayer.room),
   );
   const join_action = new PlayerAction(
     sourcePlayer.id,
-    game.turnOrder,
-    game.turnIndex,
+    await GetOrderedRoomPlayers(game.roomId),
+    await GetRoomTurnIndex(game.roomId),
     game.presents,
     (await IsRoomStarted(game.roomId)) ?? false,
   );
@@ -93,21 +76,17 @@ export async function UPGRADE(
   // on client action
   // 1. parse  2. validate  3. propogate
   client.on("message", async (message) => {
+    const index = await GetRoomTurnIndex(game.roomId);
     if (message.toString() === "start game") {
       if ((await IsRoomStarted(game.roomId)) ?? false) return;
       StartRoom(game.roomId);
-      shuffle(game.turnOrder);
+      await RandomizePlayerOrder(game.roomId);
+      const players = await GetOrderedRoomPlayers(game.roomId);
       for (const other of server.clients) {
         if (other.readyState !== other.OPEN) continue;
         other.send(
           JSON.stringify(
-            new PlayerAction(
-              "server",
-              game.turnOrder,
-              game.turnIndex,
-              game.presents,
-              true,
-            ),
+            new PlayerAction("server", players, index, game.presents, true),
           ),
         );
       }
@@ -118,14 +97,15 @@ export async function UPGRADE(
       message.toString(),
     ) as SendTakeAction;
 
-    if (parsedMessage.senderId != game.turnOrder[game.turnIndex].id) {
+    const turnOrder = await GetOrderedRoomPlayers(game.roomId);
+    if (parsedMessage.senderId != turnOrder[index].id) {
       console.error("client attempted turn out of order");
       client.send(
         JSON.stringify(
           new PlayerAction(
             "server",
-            game.turnOrder,
-            game.turnIndex,
+            turnOrder,
+            index,
             game.presents,
             (await IsRoomStarted(game.roomId)) ?? false,
           ),
@@ -148,37 +128,60 @@ export async function UPGRADE(
       console.error("client attempted to take frozen present");
       return;
     }
-    const playerIndex = game.turnOrder.findIndex(
+    const playerIndex = turnOrder.findIndex(
       (player) => player.id == sourcePlayer.id,
     );
-    if (game.turnOrder[playerIndex].present !== undefined) {
+    if (turnOrder[playerIndex].present !== undefined) {
       console.error(
         "client attempted to take present while already having one",
       );
       return;
     }
-    const previousOwner = game.turnOrder.findIndex(
+    if (await GetPresentStolenThisRound(targetPresent.gifterId)) {
+      console.error(
+        "client attempted to take present that was already stolen this round",
+      );
+      return;
+    }
+
+    const previousOwner = turnOrder.findIndex(
       (player) => player.present?.gifterId === targetPresent.gifterId,
     );
-    if (previousOwner === -1) {
-      game.turnIndex = (game.turnIndex + 1) % game.turnOrder.length;
-    } else {
-      game.turnOrder[previousOwner].present = undefined;
-      game.turnIndex = previousOwner;
-    }
-    game.turnOrder[playerIndex].present = targetPresent;
+
+    await TakeOrStealPresent(turnOrder[playerIndex].id, targetPresent.gifterId);
     targetPresent.timesTraded += 1;
 
+    if (previousOwner === -1) {
+      let tempIndex = (await GetOrderedRoomPlayers(game.roomId)).findIndex(
+        (player) => {
+          return player.present === undefined;
+        },
+      );
+      tempIndex = tempIndex === -1 ? 0 : tempIndex;
+      await SetRoomTurnIndex(game.roomId, tempIndex);
+    } else {
+      await SetRoomTurnIndex(game.roomId, previousOwner);
+    }
+
+    if (previousOwner === -1) {
+      await ResetRound(game.roomId);
+    } else {
+      await MarkPresentStolen(targetPresent.gifterId);
+    }
+
+    const players = await GetOrderedRoomPlayers(game.roomId);
+    const indexNew = await GetRoomTurnIndex(game.roomId);
+    const started = (await IsRoomStarted(game.roomId)) ?? false;
     for (const other of server.clients) {
       if (other.readyState === other.OPEN) {
         other.send(
           JSON.stringify(
             new PlayerAction(
               sourcePlayer.id,
-              game.turnOrder,
-              game.turnIndex,
+              players,
+              indexNew,
               game.presents,
-              (await IsRoomStarted(game.roomId)) ?? false,
+              started,
             ),
           ),
         );

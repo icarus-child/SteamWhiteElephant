@@ -2,6 +2,7 @@
 
 import { Player, RoomPlayer } from "@/types/player";
 import { dburl } from "@/constants";
+import { GetPlayerPresent } from "./present";
 
 export async function CreatePlayer(player: RoomPlayer): Promise<boolean> {
   const res = await fetch(dburl + "player/", {
@@ -24,6 +25,7 @@ export async function CreatePlayer(player: RoomPlayer): Promise<boolean> {
 
 type JsonPlayer = {
   playerId: string;
+  presentId: string;
   roomId: string;
   name: string;
 };
@@ -41,11 +43,12 @@ export async function GetPlayer(id: string): Promise<RoomPlayer | undefined> {
   if (json.error != null) {
     return undefined;
   }
+  const present = await GetPlayerPresent(id);
   return {
     name: json.name,
     id: id,
     room: json.roomId,
-    present: undefined,
+    present: present ?? undefined,
   };
 }
 
@@ -54,12 +57,7 @@ type JsonPlayers = {
   players: JsonPlayer[];
 };
 
-export async function GetRoomPlayers(id: string): Promise<Player[]> {
-  console.time("fetch-room-players");
-  const response = await fetch(dburl + "room-players?id=" + id, {
-    method: "GET",
-  });
-  console.timeEnd("fetch-room-players");
+async function sharedGetPlayers(response: Response) {
   let json: JsonPlayers;
   try {
     json = await response.json();
@@ -71,12 +69,50 @@ export async function GetRoomPlayers(id: string): Promise<Player[]> {
     console.error(json.error);
     return [];
   }
-  return json.players.map((p): RoomPlayer => {
-    return {
-      name: p.name,
-      id: p.playerId,
-      room: p.roomId,
-      present: undefined,
-    };
+  return Promise.all(
+    json.players.map(async (p): Promise<RoomPlayer> => {
+      const present = await GetPlayerPresent(p.playerId);
+      return {
+        name: p.name,
+        id: p.playerId,
+        room: p.roomId,
+        present: present ?? undefined,
+      };
+    }),
+  );
+}
+
+export async function GetRoomPlayers(id: string): Promise<Player[]> {
+  const response = await fetch(dburl + "room-players?id=" + id, {
+    method: "GET",
   });
+  return sharedGetPlayers(response);
+}
+
+export async function GetOrderedRoomPlayers(id: string): Promise<Player[]> {
+  const response = await fetch(dburl + "room-ordered-players?id=" + id, {
+    method: "GET",
+  });
+  return sharedGetPlayers(response);
+}
+
+export async function TakeOrStealPresent(
+  playerId: string,
+  presentId: string,
+): Promise<boolean> {
+  const res = await fetch(dburl + "take-or-steal-present", {
+    method: "POST",
+    body: JSON.stringify({
+      playerId: playerId,
+      presentId: presentId,
+    }),
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+  });
+  if (res.status == 200) {
+    return true;
+  }
+  return false;
 }

@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 import { Inputs } from "@/app/signup/components/form";
 import { CreatePlayer } from "@/db/players";
 import { CreatePresent } from "@/db/present";
+import { maxSteals } from "@/constants";
 
 export async function signup(inputs: Inputs): Promise<string[]> {
   const nameRaw = inputs.name;
@@ -99,7 +100,10 @@ export async function signup(inputs: Inputs): Promise<string[]> {
     gifterId: player.id,
     items: parsedItems,
     timesTraded: 0,
-    maxTags: Math.min(Math.min(...parsedItems.map((i) => i.tags.length)), 4),
+    maxTags: Math.min(
+      Math.min(...parsedItems.map((i) => i.tags.length)),
+      maxSteals,
+    ),
     texture: texture as Blob,
     giftName: giftName as string,
   };
@@ -109,7 +113,6 @@ export async function signup(inputs: Inputs): Promise<string[]> {
     errors.push("Internal server error while creating present");
     return errors;
   }
-  console.log(player.room);
   await createSessionCookie(playerId);
   redirect("/" + player.room);
 }

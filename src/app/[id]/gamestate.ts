@@ -24,8 +24,6 @@ export function useGameState(url: () => string, this_player: Player) {
       setIsStarted(action.gameStarted);
       setTurnIndex(action.turnIndex);
       setPresents(action.presents);
-      console.log(`gameStarted: ${action.gameStarted}`);
-      console.log(`isStarted: ${isStarted}`);
     });
 
     socket?.addEventListener(
@@ -46,7 +44,6 @@ export function useGameState(url: () => string, this_player: Player) {
 
   const takePresent = useCallback(
     (presentGifterId: string) => {
-      console.log("hit");
       if (!socket || socket.readyState !== socket.OPEN) return;
       socket.send(
         JSON.stringify(

@@ -3,6 +3,7 @@
 import { Player } from "@/types/player";
 import {
   CSSProperties,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -66,9 +67,10 @@ export type PresentPlaceholderProps = {
   onClickAction: () => void;
 };
 
-export default function PresentPlaceholder(props: PresentPlaceholderProps) {
+export default function Present(props: PresentPlaceholderProps) {
   const [eleStyle, setEleStyle] = useState<CSSProperties>({});
   const ref = useRef<HTMLDivElement>(null);
+  const [stolenThisRound, setStolenThisRound] = useState<boolean>(false);
 
   function updateSize() {
     if (!ref.current) return;
@@ -89,6 +91,30 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
     if (!props.player.present?.items[0].gameId) return;
     return `https://cdn.cloudflare.steamstatic.com/steam/apps/${props.player.present?.items[0].gameId}/library_600x900_2x.jpg`;
   }, [props.player.present?.items[0].gameId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchStolen() {
+      if (!props.player.present?.gifterId) {
+        setStolenThisRound(false);
+        return;
+      }
+      const res = await fetch(
+        "/api/opened?id=" + props.player.present?.gifterId,
+        {
+          method: "GET",
+        },
+      );
+      const stolen = (await res.json()) as boolean;
+      if (!cancelled) {
+        setStolenThisRound(stolen);
+      }
+    }
+    fetchStolen();
+    return () => {
+      cancelled = true;
+    };
+  }, [props.player.present]);
 
   const isFrozen =
     (props.player.present?.timesTraded ?? 0) >=
@@ -134,11 +160,17 @@ export default function PresentPlaceholder(props: PresentPlaceholderProps) {
       {props.isMyTurn && props.player.present ? (
         <button
           onClick={() => props.onClickAction()}
-          disabled={isClientsBroughtGift || isFrozen}
+          disabled={isClientsBroughtGift || isFrozen || stolenThisRound}
           className="steal-btn 3xl:mt-7 mt-5 text-[#FF7B8D] font-black 3xl:text-4xl text-2xl rounded-xl disabled:pointer-events-none disabled:text-[#404040] disabled:bg-[#a0a0a0] hover:rounded-b-3xl hover:rounded-t-lg transition-[border-radius] 3xl:py-3 py-2 px-10"
         >
           <span className="steal-text font-fjalla">
-            {isFrozen ? "LOCKED" : isClientsBroughtGift ? "YOURS" : "STEAL"}
+            {isFrozen
+              ? "LOCKED"
+              : stolenThisRound
+                ? "STOLEN"
+                : isClientsBroughtGift
+                  ? "YOURS"
+                  : "STEAL"}
           </span>
           <span
             aria-hidden={false}

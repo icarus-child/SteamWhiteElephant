@@ -1,6 +1,6 @@
 "use server";
 
-import { dburl } from "@/constants";
+import { dburl, maxSteals } from "@/constants";
 import { Present } from "@/types/present";
 
 export async function CreatePresent(
@@ -37,6 +37,40 @@ export async function CreatePresent(
   return true;
 }
 
+type JsonPresent = {
+  error: string;
+  present: Present;
+};
+
+export async function GetPlayerPresent(id: string): Promise<Present | null> {
+  const response = await fetch(dburl + "player-present?id=" + id, {
+    method: "GET",
+  });
+  let json: JsonPresent;
+  try {
+    json = await response.json();
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+  if (json.error != null) {
+    console.error(json.error);
+    return null;
+  }
+  if (json.present === null) {
+    return null;
+  }
+  return {
+    ...json.present,
+    timesTraded: 0,
+    maxTags: Math.min(
+      Math.min(...json.present.items.map((i) => i.tags.length)),
+      maxSteals,
+    ),
+    giftName: json.present.giftName,
+  };
+}
+
 type JsonPresents = {
   error: string;
   presents: Present[];
@@ -62,9 +96,71 @@ export async function GetRoomPresents(id: string): Promise<Present[]> {
       return {
         ...p,
         timesTraded: 0,
-        maxTags: Math.min(Math.min(...p.items.map((i) => i.tags.length)), 4),
+        maxTags: Math.min(
+          Math.min(...p.items.map((i) => i.tags.length)),
+          maxSteals,
+        ),
         giftName: p.giftName,
       };
     }),
   );
+}
+
+type JsonError = {
+  error: string;
+};
+
+export async function ResetRound(id: string): Promise<undefined> {
+  const response = await fetch(dburl + "reset-round?id=" + id, {
+    method: "POST",
+  });
+  let json: JsonError;
+  try {
+    json = await response.json();
+  } catch (error) {
+    console.error(error);
+    return;
+  }
+  if (json.error != null) {
+    console.error(json.error);
+  }
+}
+
+export async function MarkPresentStolen(id: string): Promise<undefined> {
+  const response = await fetch(dburl + "mark-present-stolen?id=" + id, {
+    method: "POST",
+  });
+  let json: JsonError;
+  try {
+    json = await response.json();
+  } catch (error) {
+    console.error(error);
+    return;
+  }
+  if (json.error != null) {
+    console.error(json.error);
+  }
+}
+
+type JsonOpened = {
+  error: string;
+  opened: boolean;
+};
+
+export async function GetPresentStolenThisRound(id: string): Promise<boolean> {
+  const response = await fetch(dburl + "present-stolen-this-round?id=" + id, {
+    method: "GET",
+  });
+  let json: JsonOpened;
+  try {
+    json = await response.json();
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+  if (json.error != null) {
+    console.error(json.error);
+    return false;
+  }
+  return json.opened;
 }
