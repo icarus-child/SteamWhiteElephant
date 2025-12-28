@@ -118,7 +118,7 @@ export default function ClientGame({ player }: ClientGameProps) {
 
   const [players, presents, turnIndex, takePresent, isStarted, startGame] =
     useGameState(
-      () => `ws://${window.location.host}/${player.room}/ws`,
+      () => `wss://${window.location.host}/${player.room}/ws`,
       player,
     );
   const textures = usePresentTextures(presents);

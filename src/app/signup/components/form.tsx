@@ -113,9 +113,7 @@ export default function Form() {
           <h2 className="font-inknut font-semibold text-3xl text-white pb-1">
             New Gifter
           </h2>
-          <p className="text-white font-inter pb-6">
-            Enter your player name and room ID
-          </p>
+          <p className="text-white font-inter pb-6">Enter your player name</p>
           <Input
             id="inline-name"
             name="name"
