@@ -60,11 +60,7 @@ export function useGameState(url: () => string, this_player: Player) {
   );
 
   const startGame = useCallback(
-    (sender: Player) => {
-      // console.log(
-      //   `sender.id: ${sender.id} - players[0]?.id: ${players[0]?.id}`,
-      // );
-      // if (sender.id !== players[0]?.id) return;
+    (_: Player) => {
       if (!socket || socket.readyState !== socket.OPEN) return;
       socket.send("start game");
     },

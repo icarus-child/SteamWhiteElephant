@@ -179,15 +179,6 @@ export async function UPGRADE(
       await MarkPresentStolen(game.presents[targetPresentIndex].gifterId);
     }
 
-    console.log(
-      "target:",
-      game.presents[targetPresentIndex].timesTraded,
-      "sent:",
-      game.presents.find(
-        (p: any) => p.gifterId === game.presents[targetPresentIndex].gifterId,
-      )?.timesTraded,
-    );
-
     const players = await GetOrderedRoomPlayers(game.roomId);
     const indexNew = await GetRoomTurnIndex(game.roomId);
     const started = (await IsRoomStarted(game.roomId)) ?? false;
