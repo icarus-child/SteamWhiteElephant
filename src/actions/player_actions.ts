@@ -20,10 +20,6 @@ export class PlayerAction {
     this.presents = presents;
     this.gameStarted = gameStarted;
   }
-  // async SyncRoom(roomId: string) {
-  // this.players = await GetRoomPlayers(roomId);
-  // this.presents = await GetRoomPresents(roomId);
-  // }
 }
 
 export type SendTakeAction = {

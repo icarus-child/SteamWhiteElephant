@@ -84,7 +84,6 @@ export default function Draggable(props: DraggableProps) {
   const scrollTargetIndex = useRef(0);
 
   const wheelEventHandlerSnap = useCallback((e: WheelEvent) => {
-    // const ele = e.target as HTMLDivElement;
     if (!ref.current) return;
     const ele = ref.current;
     if (e.deltaY > 0) {
@@ -113,7 +112,6 @@ export default function Draggable(props: DraggableProps) {
   }, []);
 
   const wheelEventHandlerNoSnap = useCallback((e: WheelEvent) => {
-    // const ele = e.target as HTMLDivElement;
     if (!ref.current) return;
     const ele = ref.current;
     scrollTargetPoint.current = Math.max(
