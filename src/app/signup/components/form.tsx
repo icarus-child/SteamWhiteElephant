@@ -32,7 +32,7 @@ export type Inputs = {
 export default function Form() {
   const [inputs, setInputs] = useState<Inputs>({
     name: null,
-    room: "game",
+    room: null,
     games: [],
     giftName: null,
     texture: null,
@@ -113,7 +113,9 @@ export default function Form() {
           <h2 className="font-inknut font-semibold text-3xl text-white pb-1">
             New Gifter
           </h2>
-          <p className="text-white font-inter pb-6">Enter your player name</p>
+          <p className="text-white font-inter pb-6">
+            Enter your player name and room ID
+          </p>
           <Input
             id="inline-name"
             name="name"
@@ -129,7 +131,6 @@ export default function Form() {
             onChange={handleRoomIdChange}
             type="text"
             className="mb-4"
-            hidden={true}
           />
           <Button className="mb-6">{submitButton}</Button>
           <div className={`${pending ? "" : "hidden"}`}>
