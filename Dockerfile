@@ -13,6 +13,7 @@ RUN npm ci --audit false --fund false
 COPY . .
 
 # Build Next.js app
+ENV NODE_OPTIONS=--max-old-space-size=768
 RUN npm run build
 
 # ----------------------------
