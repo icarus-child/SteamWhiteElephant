@@ -8,6 +8,7 @@ WORKDIR /app
 # Install dependencies
 COPY package.json package-lock.json* ./
 RUN npm ci --audit false --fund false
+RUN npx next-ws patch
 
 # Copy source code
 COPY . .
